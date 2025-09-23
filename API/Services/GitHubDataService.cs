@@ -88,6 +88,7 @@ public class GitHubDataService : BackgroundService
                 {
                     commitDataList.Add(new CommitData
                     {
+                        Id = repo.Name.GetHashCode(), // Generate stable unique ID based on repo name
                         RepositoryName = repo.Name,
                         RepositoryUrl = repo.HtmlUrl,
                         CommitCount = commits.Count,

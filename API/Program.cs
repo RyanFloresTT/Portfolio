@@ -61,6 +61,30 @@ app.MapGet("/personal-summary", async (CommitAnalysisService commitAnalysisServi
     return Results.Ok(new { summary });
 });
 
+app.MapGet("/health/ollama", async (IHttpClientFactory httpClientFactory, IConfiguration config) => {
+    try
+    {
+        var ollamaUrl = config["Ollama:BaseUrl"] ?? "http://127.0.0.1:11434";
+        var client = httpClientFactory.CreateClient();
+        client.Timeout = TimeSpan.FromSeconds(5);
+        
+        var response = await client.GetAsync($"{ollamaUrl}/api/tags");
+        return Results.Ok(new { 
+            status = response.IsSuccessStatusCode ? "healthy" : "unhealthy",
+            statusCode = response.StatusCode,
+            ollamaUrl = ollamaUrl
+        });
+    }
+    catch (Exception ex)
+    {
+        return Results.Ok(new { 
+            status = "unhealthy", 
+            error = ex.Message,
+            ollamaUrl = config["Ollama:BaseUrl"] ?? "http://127.0.0.1:11434"
+        });
+    }
+});
+
 app.MapPost("/trigger-github-sync", async (GitHubDataService githubService) => {
     try
     {

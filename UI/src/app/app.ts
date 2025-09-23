@@ -12,12 +12,7 @@ export class App implements OnInit {
   protected readonly title = signal('Portfolio Dashboard');
   public displaySummary = signal('');
 
-  constructor(public portfolioService: PortfolioService) {}
-
-  ngOnInit() {
-    this.portfolioService.loadCommitData();
-    this.portfolioService.loadPersonalSummary();
-    
+  constructor(public portfolioService: PortfolioService) {
     // Watch for summary changes and trigger typewriter effect
     effect(() => {
       const summary = this.portfolioService.personalSummary();
@@ -25,6 +20,11 @@ export class App implements OnInit {
         this.typewriterEffect(summary);
       }
     });
+  }
+
+  ngOnInit() {
+    this.portfolioService.loadCommitData();
+    this.portfolioService.loadPersonalSummary();
   }
 
   getTotalCommits(): number {

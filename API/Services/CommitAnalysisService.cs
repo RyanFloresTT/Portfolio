@@ -1,5 +1,8 @@
 using System.Text.Json;
+using API.Hubs;
 using API.Models;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace API.Services;
 
@@ -10,19 +13,22 @@ public class CommitAnalysisService
     private readonly ILogger<CommitAnalysisService> _logger;
     private readonly IConfiguration _configuration;
     private readonly IHubContext<PortfolioHub> _hubContext;
+    private readonly IServiceProvider _serviceProvider;
 
     public CommitAnalysisService(
         IHttpClientFactory httpClientFactory,
         RedisService redisService,
         ILogger<CommitAnalysisService> logger,
         IConfiguration configuration,
-        IHubContext<PortfolioHub> hubContext)
+        IHubContext<PortfolioHub> hubContext,
+        IServiceProvider serviceProvider)
     {
         _httpClientFactory = httpClientFactory;
         _redisService = redisService;
         _logger = logger;
         _configuration = configuration;
         _hubContext = hubContext;
+        _serviceProvider = serviceProvider;
     }
 
     public async Task<string> GetPersonalSummaryAsync()
@@ -54,40 +60,80 @@ public class CommitAnalysisService
                 return "Hi, I'm Ryan! I'm currently working on some exciting projects. Check back soon for updates!";
             }
 
-            // Extract commit messages from the data (we'll need to modify the data structure)
+            // Check if Ollama is available
+            var ollamaUrl = _configuration["Ollama:BaseUrl"] ?? "http://127.0.0.1:11434";
+            var healthClient = _httpClientFactory.CreateClient();
+            healthClient.Timeout = TimeSpan.FromSeconds(5);
+            
+            try
+            {
+                var healthResponse = await healthClient.GetAsync($"{ollamaUrl}/api/tags");
+                if (!healthResponse.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning("Ollama health check failed, using fallback summary");
+                    return $"Hi, I'm Ryan! I've been actively working on {string.Join(", ", commitData.Take(3).Select(c => c.RepositoryName))} and other exciting projects. Check out my repositories to see what I've been building!";
+                }
+            }
+            catch (Exception healthEx)
+            {
+                _logger.LogWarning(healthEx, "Ollama is not available, using fallback summary");
+                return $"Hi, I'm Ryan! I've been actively working on {string.Join(", ", commitData.Take(3).Select(c => c.RepositoryName))} and other exciting projects. Check out my repositories to see what I've been building!";
+            }
+
+            // Get detailed commit information for analysis
             var recentRepos = commitData
                 .OrderByDescending(c => c.LastUpdated)
-                .Take(5)
-                .Select(c => c.RepositoryName)
+                .Take(3)
                 .ToList();
 
-            var prompt = $@"Analyze these recent repository activities and create a friendly, personal summary of what I've been working on.
+            var commitDetails = new List<string>();
+            
+            // Fetch actual commit messages for each repository
+            foreach (var repo in recentRepos)
+            {
+                try
+                {
+                    var commits = await FetchRecentCommits(repo.RepositoryName);
+                    if (commits?.Any() == true)
+                    {
+                        commitDetails.Add($"{repo.RepositoryName}: {string.Join(", ", commits.Take(3))}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to fetch commits for {RepoName}", repo.RepositoryName);
+                }
+            }
 
-Recent repositories with activity: {string.Join(", ", recentRepos)}
+            var prompt = $@"Write a casual first-person summary of recent work. Start directly with what I've been working on. No introductions, no Here's or I've been - just the work itself.
 
-Create a natural, first-person summary like: 'Hi, I'm Ryan, I've been working on...' 
-Keep it conversational and highlight the most interesting projects. 
-Make it sound personal and engaging, around 2-3 sentences.";
+Recent commits:
+{string.Join("\n", commitDetails)}
 
-            var ollamaUrl = _configuration["Ollama:BaseUrl"] ?? "http://127.0.0.1:11434";
+Based on these commits, describe what I've been building and fixing. Be specific about the work done.";
+
             var model = _configuration["Ollama:Model"] ?? "llama3.2";
 
-            var client = _httpClientFactory.CreateClient();
-            client.Timeout = TimeSpan.FromSeconds(30); // Ollama can be slower
+                    var client = _httpClientFactory.CreateClient();
+                    client.Timeout = TimeSpan.FromMinutes(2);
 
-            var requestBody = new
-            {
-                model = model,
-                prompt = prompt,
-                stream = false,
-                options = new
-                {
-                    temperature = 0.7,
-                    max_tokens = 150
-                }
-            };
+                    var requestBody = new
+                    {
+                        model = model,
+                        prompt = prompt,
+                        stream = false,
+                        options = new
+                        {
+                            temperature = 0.3, // Lower temperature for more focused responses
+                            num_predict = 200 // Allow for more detailed responses
+                        }
+                    };
 
+            _logger.LogInformation("Calling Ollama API at {OllamaUrl} with model {Model}", ollamaUrl, model);
+            
             var response = await client.PostAsJsonAsync($"{ollamaUrl}/api/generate", requestBody);
+            
+            _logger.LogInformation("Ollama API response status: {StatusCode}", response.StatusCode);
             
             if (response.IsSuccessStatusCode)
             {
@@ -96,8 +142,20 @@ Make it sound personal and engaging, around 2-3 sentences.";
                 
                 if (!string.IsNullOrEmpty(summary))
                 {
+                    // Clean up the response
+                    summary = CleanUpResponse(summary);
+                    _logger.LogInformation("Successfully generated AI summary: {Summary}", summary);
                     return summary;
                 }
+                else
+                {
+                    _logger.LogWarning("Ollama returned empty response");
+                }
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                _logger.LogError("Ollama API error {StatusCode}: {Error}", response.StatusCode, errorContent);
             }
 
             // Fallback if API fails
@@ -122,6 +180,95 @@ Make it sound personal and engaging, around 2-3 sentences.";
         await _hubContext.Clients.All.SendAsync("PersonalSummaryUpdated", newSummary);
         
         _logger.LogInformation("Personal summary updated and broadcasted to clients");
+    }
+
+    private string CleanUpResponse(string response)
+    {
+        response = response.Trim();
+        
+        if (response.StartsWith("\"") && response.EndsWith("\""))
+        {
+            response = response.Substring(1, response.Length - 2);
+        }
+        
+        // Remove common AI prefixes
+        var prefixes = new[]
+        {
+            "Here's a friendly, personal summary of your recent repository activities:",
+            "Here's a brief, casual first-person summary:",
+            "Here's what I've been working on:",
+            "Here's a summary:",
+            "Here's what I've been up to:",
+            "Here's my recent work:",
+            "Here's a brief summary:",
+            "Here's what I've been doing:",
+            "Here's my recent activity:",
+            "Here's what I've been building:"
+        };
+        
+        foreach (var prefix in prefixes)
+        {
+            if (response.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            {
+                response = response.Substring(prefix.Length).Trim();
+                // Remove leading quote if present
+                if (response.StartsWith("\""))
+                {
+                    response = response.Substring(1);
+                }
+                break;
+            }
+        }
+        
+        // Remove trailing quotes and periods if they seem excessive
+        if (response.EndsWith("\""))
+        {
+            response = response.Substring(0, response.Length - 1);
+        }
+        
+        // Ensure it ends with a period
+        if (!response.EndsWith(".") && !response.EndsWith("!") && !response.EndsWith("?"))
+        {
+            response += ".";
+        }
+        
+        return response.Trim();
+    }
+
+    private async Task<List<string>?> FetchRecentCommits(string repositoryName)
+    {
+        try
+        {
+            var httpClientFactory = _serviceProvider.GetRequiredService<IHttpClientFactory>();
+            var client = httpClientFactory.CreateClient("GitHub");
+            
+            var periodStart = DateTime.UtcNow.AddDays(-90);
+            var since = periodStart.ToString("o");
+            
+            // Get commits for the specific repository
+            var commitsUrl = $"https://api.github.com/repos/ryanflorestt/{repositoryName}/commits?since={since}&per_page=10";
+            var response = await client.GetAsync(commitsUrl);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                var commits = await response.Content.ReadFromJsonAsync<List<GitHubCommit>>();
+                if (commits?.Any() == true)
+                {
+                    return commits
+                        .Where(c => c.Commit?.Message != null)
+                        .Select(c => c.Commit.Message.Split('\n')[0]) // Get first line of commit message
+                        .Where(msg => !string.IsNullOrWhiteSpace(msg))
+                        .Take(5) // Limit to 5 most recent
+                        .ToList();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to fetch commits for repository {RepositoryName}", repositoryName);
+        }
+        
+        return null;
     }
 }
 
