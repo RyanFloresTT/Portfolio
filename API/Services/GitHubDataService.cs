@@ -56,7 +56,7 @@ public class GitHubDataService : BackgroundService
         var repositories = await response.Content.ReadFromJsonAsync<List<GitHubRepository>>();
         if (repositories == null) return;
 
-        var periodStart = DateTime.UtcNow.AddDays(-30);
+        var periodStart = DateTime.UtcNow.AddDays(-90);
         var periodEnd = DateTime.UtcNow;
         var commitDataList = new List<CommitData>();
 
@@ -84,8 +84,9 @@ public class GitHubDataService : BackgroundService
                     commitDataList.Add(new CommitData
                     {
                         RepositoryName = repo.Name,
+                        RepositoryUrl = repo.HtmlUrl,
                         CommitCount = commits.Count,
-                        LastUpdated = DateTime.UtcNow,
+                        LastUpdated = commits.Max(c => c.Commit.Author.Date),
                         PeriodStart = periodStart,
                         PeriodEnd = periodEnd
                     });

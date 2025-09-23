@@ -1,7 +1,6 @@
 <div class="container">
   <header>
     <h1>{{ title() }}</h1>
-    <p>App is loading...</p>
     <div class="status">
       <span class="status-indicator" [class]="portfolioService.connectionStatus()"></span>
       {{ portfolioService.connectionStatus() }}
@@ -28,7 +27,16 @@
         <div class="repo-list">
           @for (repo of portfolioService.commitData(); track repo.id) {
             <div class="repo-card">
-              <h4>{{ repo.repositoryName }}</h4>
+              <h4>
+                <a [href]="repo.repositoryUrl" target="_blank" rel="noopener noreferrer" class="repo-link">
+                  {{ repo.repositoryName }}
+                  <svg class="external-link-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                    <polyline points="15,3 21,3 21,9"></polyline>
+                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                  </svg>
+                </a>
+              </h4>
               <div class="commit-count">{{ repo.commitCount }} commits</div>
               <div class="last-updated">Updated: {{ formatDate(repo.lastUpdated) }}</div>
             </div>

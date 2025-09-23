@@ -9,6 +9,8 @@ public class CommitData
     
     public string RepositoryName { get; set; } = string.Empty;
     
+    public string RepositoryUrl { get; set; } = string.Empty;
+    
     public int CommitCount { get; set; }
     
     public DateTime LastUpdated { get; set; }

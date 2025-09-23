@@ -6,6 +6,7 @@ import { firstValueFrom } from 'rxjs';
 export interface CommitData {
   id: number;
   repositoryName: string;
+  repositoryUrl: string;
   commitCount: number;
   lastUpdated: string;
   periodStart: string;
