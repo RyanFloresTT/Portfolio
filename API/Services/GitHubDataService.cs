@@ -13,17 +13,23 @@ public class GitHubDataService : BackgroundService
     private readonly ILogger<GitHubDataService> _logger;
     private readonly IConfiguration _configuration;
     private readonly IHubContext<PortfolioHub> _hubContext;
+    private readonly RedisService _redisService;
+    private readonly CommitAnalysisService _commitAnalysisService;
 
     public GitHubDataService(
         IServiceProvider serviceProvider,
         ILogger<GitHubDataService> logger,
         IConfiguration configuration,
-        IHubContext<PortfolioHub> hubContext)
+        IHubContext<PortfolioHub> hubContext,
+        RedisService redisService,
+        CommitAnalysisService commitAnalysisService)
     {
         _serviceProvider = serviceProvider;
         _logger = logger;
         _configuration = configuration;
         _hubContext = hubContext;
+        _redisService = redisService;
+        _commitAnalysisService = commitAnalysisService;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -47,7 +53,6 @@ public class GitHubDataService : BackgroundService
     {
         using var scope = _serviceProvider.CreateScope();
         var httpClientFactory = scope.ServiceProvider.GetRequiredService<IHttpClientFactory>();
-        var dbContext = scope.ServiceProvider.GetRequiredService<PortfolioDbContext>();
 
         var client = httpClientFactory.CreateClient("GitHub");
         var response = await client.GetAsync("https://api.github.com/users/ryanflorestt/repos");
@@ -100,15 +105,14 @@ public class GitHubDataService : BackgroundService
 
         commitDataList.Sort((a, b) => b.LastUpdated.CompareTo(a.LastUpdated));
 
-        // Store in database
+        // Store in Redis
         if (commitDataList.Any())
         {
-            // Clear all existing data (since we're getting fresh data for all repos)
-            await dbContext.CommitData.ExecuteDeleteAsync();
-
-            // Add new data
-            await dbContext.CommitData.AddRangeAsync(commitDataList);
-            await dbContext.SaveChangesAsync();
+            // Store commit data in Redis
+            await _redisService.SetAsync("github:commits", commitDataList, TimeSpan.FromHours(2));
+            
+            // Invalidate AI summary cache to trigger new analysis
+            await _commitAnalysisService.InvalidateCacheAsync();
 
             // Notify clients via SignalR
             await _hubContext.Clients.All.SendAsync("CommitDataUpdated", commitDataList);

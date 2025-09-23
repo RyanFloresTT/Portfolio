@@ -1,6 +1,9 @@
 <div class="container">
   <header>
     <h1>{{ title() }}</h1>
+    <div class="personal-summary">
+      <p>{{ displaySummary() }}<span class="cursor">|</span></p>
+    </div>
     <div class="status">
       <span class="status-indicator" [class]="portfolioService.connectionStatus()"></span>
       {{ portfolioService.connectionStatus() }}
@@ -19,8 +22,39 @@
       </div>
     </div>
 
+    <div class="heatmap-section">
+      <h2>Repository Activity Heatmap</h2>
+      @if (portfolioService.commitData().length === 0) {
+        <p class="no-data">Loading commit data...</p>
+      } @else {
+        <div class="heatmap-container">
+          <div class="heatmap-grid">
+            @for (repo of getSortedRepositories(); track repo.id) {
+              <div class="heatmap-cell" 
+                   [style.background-color]="getHeatmapColor(repo.commitCount)"
+                   [title]="repo.repositoryName + ': ' + repo.commitCount + ' commits'">
+                <div class="heatmap-label">{{ repo.repositoryName }}</div>
+                <div class="heatmap-count">{{ repo.commitCount }}</div>
+              </div>
+            }
+          </div>
+          <div class="heatmap-legend">
+            <span class="legend-label">Less Active</span>
+            <div class="legend-colors">
+              <div class="legend-color" style="background-color: #f8f9fa;"></div>
+              <div class="legend-color" style="background-color: #e3f2fd;"></div>
+              <div class="legend-color" style="background-color: #bbdefb;"></div>
+              <div class="legend-color" style="background-color: #90caf9;"></div>
+              <div class="legend-color" style="background-color: #64b5f6;"></div>
+            </div>
+            <span class="legend-label">More Active</span>
+          </div>
+        </div>
+      }
+    </div>
+
     <div class="repositories">
-      <h2>Repository Activity</h2>
+      <h2>Repository Details</h2>
       @if (portfolioService.commitData().length === 0) {
         <p class="no-data">Loading commit data...</p>
       } @else {

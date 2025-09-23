@@ -20,6 +20,7 @@ export class PortfolioService {
   private hubConnection?: HubConnection;
   public commitData = signal<CommitData[]>([]);
   public connectionStatus = signal<string>('Disconnected');
+  public personalSummary = signal<string>('');
 
   constructor(private http: HttpClient) {
     this.initializeSignalR();
@@ -32,6 +33,10 @@ export class PortfolioService {
 
     this.hubConnection.on('CommitDataUpdated', (data: CommitData[]) => {
       this.commitData.set(data);
+    });
+
+    this.hubConnection.on('PersonalSummaryUpdated', (summary: string) => {
+      this.personalSummary.set(summary);
     });
 
     this.hubConnection.onclose(() => {
@@ -63,6 +68,18 @@ export class PortfolioService {
       }
     } catch (error) {
       console.error('Error loading commit data:', error);
+    }
+  }
+
+  async loadPersonalSummary() {
+    try {
+      const response = await firstValueFrom(this.http.get<{summary: string}>('http://localhost:5220/personal-summary'));
+      if (response?.summary) {
+        this.personalSummary.set(response.summary);
+      }
+    } catch (error) {
+      console.error('Error loading personal summary:', error);
+      this.personalSummary.set('Hi, I\'m Ryan! I\'m currently working on some exciting projects. Check back soon for updates!');
     }
   }
 }

@@ -4,13 +4,24 @@ using API.Data;
 using API.Services;
 using API.Hubs;
 using Microsoft.EntityFrameworkCore;
+using StackExchange.Redis;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
 
-builder.Services.AddDbContext<PortfolioDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=portfolio.db"));
+// Add Redis
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379";
+});
+
+builder.Services.AddSingleton<IConnectionMultiplexer>(provider =>
+    ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379"));
+
+// Add custom services
+builder.Services.AddSingleton<RedisService>();
+builder.Services.AddSingleton<CommitAnalysisService>();
 
 builder.Services.AddSignalR();
 
@@ -32,12 +43,6 @@ builder.Services.AddHttpClient("GitHub", client => {
 
 WebApplication app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
-{
-    var context = scope.ServiceProvider.GetRequiredService<PortfolioDbContext>();
-    context.Database.EnsureCreated();
-}
-
 if (app.Environment.IsDevelopment()) app.MapOpenApi();
 
 app.UseHttpsRedirection();
@@ -46,12 +51,14 @@ app.UseCors();
 
 app.MapHub<PortfolioHub>("/portfolioHub");
 
-app.MapGet("/", async (PortfolioDbContext dbContext) => {
-    var commitData = await dbContext.CommitData
-        .OrderByDescending(c => c.LastUpdated)
-        .ToListAsync();
-    
-    return Results.Ok(commitData);
+app.MapGet("/", async (RedisService redisService) => {
+    var commitData = await redisService.GetAsync<List<CommitData>>("github:commits");
+    return Results.Ok(commitData ?? new List<CommitData>());
+});
+
+app.MapGet("/personal-summary", async (CommitAnalysisService commitAnalysisService) => {
+    var summary = await commitAnalysisService.GetPersonalSummaryAsync();
+    return Results.Ok(new { summary });
 });
 
 app.MapPost("/trigger-github-sync", async (GitHubDataService githubService) => {
