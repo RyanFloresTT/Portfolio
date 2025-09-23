@@ -98,6 +98,8 @@ public class GitHubDataService : BackgroundService
             }
         }
 
+        commitDataList.Sort((a, b) => b.LastUpdated.CompareTo(a.LastUpdated));
+
         // Store in database
         if (commitDataList.Any())
         {
