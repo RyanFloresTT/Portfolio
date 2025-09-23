@@ -1,14 +1,24 @@
+using System.Net;
 using API.Models;
+using API.Data;
+using API.Services;
+using API.Hubs;
+using Microsoft.EntityFrameworkCore;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-builder.Services.AddHttpClient("GitHub", client =>
-{
-    client.BaseAddress = new Uri("https://api.github.com/");
+builder.Services.AddDbContext<PortfolioDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=portfolio.db"));
+
+builder.Services.AddSignalR();
+
+builder.Services.AddCors();
+
+builder.Services.AddHostedService<GitHubDataService>();
+
+builder.Services.AddHttpClient("GitHub", client => {
     client.DefaultRequestHeaders.UserAgent.ParseAdd("rryanflorres portfolio API");
     client.DefaultRequestHeaders.Authorization =
         new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", builder.Configuration["GitHub:Token"]);
@@ -16,26 +26,29 @@ builder.Services.AddHttpClient("GitHub", client =>
 
 WebApplication app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment()) {
-    app.MapOpenApi();
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<PortfolioDbContext>();
+    context.Database.EnsureCreated();
 }
+
+if (app.Environment.IsDevelopment()) app.MapOpenApi();
 
 app.UseHttpsRedirection();
 
-app.MapGet("/", async (IHttpClientFactory factory) => {
-    HttpClient client = factory.CreateClient("GitHub");
-    HttpResponseMessage res  = await client.GetAsync("users/ryanflorestt/repos");
-    res.EnsureSuccessStatusCode();
-    var repositories = await res.Content.ReadFromJsonAsync<List<GitHubRepository>>();
+app.UseCors(policy => policy
+    .AllowAnyOrigin()
+    .AllowAnyMethod()
+    .AllowAnyHeader());
 
-    foreach (var repo in repositories) {
-        res = await client.GetAsync(repo.CommitsUrl);
-        res.EnsureSuccessStatusCode();
-        var reposJson = await res.Content.ReadAsStringAsync();
-    }
+app.MapHub<PortfolioHub>("/portfolioHub");
+
+app.MapGet("/", async (PortfolioDbContext dbContext) => {
+    var commitData = await dbContext.CommitData
+        .OrderByDescending(c => c.LastUpdated)
+        .ToListAsync();
     
-    return Results.Ok((repositories ?? []).Select(x => x.Name));
+    return Results.Ok(commitData);
 });
 
 app.Run();
