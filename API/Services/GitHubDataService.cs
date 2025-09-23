@@ -43,7 +43,7 @@ public class GitHubDataService : BackgroundService
         }
     }
 
-    private async Task FetchAndStoreGitHubData()
+    public async Task FetchAndStoreGitHubData()
     {
         using var scope = _serviceProvider.CreateScope();
         var httpClientFactory = scope.ServiceProvider.GetRequiredService<IHttpClientFactory>();
@@ -100,10 +100,8 @@ public class GitHubDataService : BackgroundService
         // Store in database
         if (commitDataList.Any())
         {
-            // Clear existing data for this period
-            await dbContext.CommitData
-                .Where(c => c.PeriodStart == periodStart && c.PeriodEnd == periodEnd)
-                .ExecuteDeleteAsync();
+            // Clear all existing data (since we're getting fresh data for all repos)
+            await dbContext.CommitData.ExecuteDeleteAsync();
 
             // Add new data
             await dbContext.CommitData.AddRangeAsync(commitDataList);
