@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ghost
+  namespace: portfolio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ghost
+  template:
+    metadata:
+      labels:
+        app: ghost
+    spec:
+      containers:
+      - name: ghost
+        image: ghost:alpine
+        ports:
+        - containerPort: 2368
+        env:
+        - name: database__client
+          value: "sqlite3"
+        - name: database__connection__filename
+          value: "/var/lib/ghost/content/data/ghost.db"
+        - name: url
+          value: "http://localhost:30080"
+        - name: server__host
+          value: "0.0.0.0"
+        - name: server__port
+          value: "2368"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        volumeMounts:
+        - name: ghost-data
+          mountPath: /var/lib/ghost/content
+      volumes:
+      - name: ghost-data
+        persistentVolumeClaim:
+          claimName: ghost-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ghost-pvc
+  namespace: portfolio
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ghost-service
+  namespace: portfolio
+spec:
+  selector:
+    app: ghost
+  ports:
+  - port: 80
+    targetPort: 2368
+    nodePort: 30080
+  type: NodePort

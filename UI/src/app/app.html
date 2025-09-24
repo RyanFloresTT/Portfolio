@@ -59,7 +59,7 @@
         <p class="no-data">Loading commit data...</p>
       } @else {
         <div class="repo-list">
-          @for (repo of portfolioService.commitData(); track repo.repositoryName) {
+          @for (repo of portfolioService.commitData(); track repo.id) {
             <div class="repo-card">
               <h4>
                 <a [href]="repo.repositoryUrl" target="_blank" rel="noopener noreferrer" class="repo-link">
@@ -78,5 +78,6 @@
         </div>
       }
   </div>
+
 </main>
-</div>
+        </div>

@@ -15,7 +15,8 @@ spec:
     spec:
       containers:
       - name: api
-        image: your-registry/portfolio-api:latest
+        image: portfolio-api:latest
+        imagePullPolicy: Never
         ports:
         - containerPort: 8080
         env:
@@ -24,10 +25,7 @@ spec:
         - name: Ollama__BaseUrl
           value: "http://ollama-service:11434"
         - name: Github__Token
-          valueFrom:
-            secretKeyRef:
-              name: github-secret
-              key: token
+          value: ""
         resources:
           requests:
             memory: "256Mi"
@@ -47,4 +45,5 @@ spec:
   ports:
   - port: 80
     targetPort: 8080
-  type: ClusterIP
+    nodePort: 30081
+  type: NodePort

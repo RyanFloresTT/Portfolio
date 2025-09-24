@@ -1,6 +1,4 @@
-using System.Net;
 using API.Models;
-using API.Data;
 using API.Services;
 using API.Hubs;
 using Microsoft.EntityFrameworkCore;
@@ -27,7 +25,7 @@ builder.Services.AddSignalR();
 
 builder.Services.AddCors(options =>
     options.AddDefaultPolicy(policy =>
-        policy.WithOrigins("http://localhost:4200")
+        policy.WithOrigins("http://localhost:4200", "http://localhost:30082")
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials()));
@@ -60,6 +58,7 @@ app.MapGet("/personal-summary", async (CommitAnalysisService commitAnalysisServi
     var summary = await commitAnalysisService.GetPersonalSummaryAsync();
     return Results.Ok(new { summary });
 });
+
 
 app.MapGet("/health/ollama", async (IHttpClientFactory httpClientFactory, IConfiguration config) => {
     try

@@ -1,0 +1,70 @@
+services:
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - portfolio-network
+
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - portfolio-network
+ 
+  ghost:
+    image: ghost:alpine
+    ports:
+      - "30080:2368"
+    environment:
+      - database__client=sqlite3
+      - database__connection__filename=/var/lib/ghost/content/data/ghost.db
+      - url=http://localhost:30080
+      - server__host=0.0.0.0
+      - server__port=2368
+    volumes:
+      - ghost_data:/var/lib/ghost/content
+    networks:
+      - portfolio-network
+
+  api:
+    build:
+      context: ./API
+      dockerfile: Dockerfile
+    ports:
+      - "30081:8080"
+    environment:
+      - ConnectionStrings__Redis=redis:6379
+      - Ollama__BaseUrl=http://ollama:11434
+      - Ollama__Model=llama3.2
+      - Github__Token=${GITHUB_TOKEN}
+      - SignalR__HubUrl=http://localhost:30081/portfolioHub
+    depends_on:
+      - redis
+      - ollama
+    networks:
+      - portfolio-network
+
+  frontend:
+    build:
+      context: ./UI
+      dockerfile: Dockerfile
+    ports:
+      - "30082:80"
+    depends_on:
+      - api
+    networks:
+      - portfolio-network
+
+volumes:
+  ollama_data:
+  ghost_data:
+
+networks:
+  portfolio-network:
+    driver: bridge
