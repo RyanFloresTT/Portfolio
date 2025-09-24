@@ -5,13 +5,11 @@ import { PortfolioService, CommitData } from './services/portfolio.service';
 @Component({
   selector: 'app-root',
   imports: [CommonModule],
-  templateUrl: './app.html',
-  styleUrl: './app.css'
+  templateUrl: './app.html' // Using main template now
 })
 export class App implements OnInit {
   protected readonly title = signal('Portfolio Dashboard');
   public displaySummary = signal('');
-  protected readonly viewMode = signal<'heatmap' | 'details'>('heatmap');
 
   constructor(public portfolioService: PortfolioService) {
     // Watch for summary changes and trigger typewriter effect
@@ -51,9 +49,6 @@ export class App implements OnInit {
     return '#64b5f6';
   }
 
-  setViewMode(mode: 'heatmap' | 'details'): void {
-    this.viewMode.set(mode);
-  }
 
   openRepository(url: string): void {
     window.open(url, '_blank', 'noopener,noreferrer');
