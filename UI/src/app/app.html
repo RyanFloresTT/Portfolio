@@ -4,9 +4,21 @@
     <div class="personal-summary">
       <p>{{ displaySummary() }}<span class="cursor">|</span></p>
     </div>
-    <div class="status">
-      <span class="status-indicator" [class]="portfolioService.connectionStatus()"></span>
-      {{ portfolioService.connectionStatus() }}
+    <div class="header-actions">
+      <a href="http://localhost:30080" target="_blank" rel="noopener noreferrer" class="blog-link">
+        <svg class="blog-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14,2 14,8 20,8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10,9 9,9 8,9"></polyline>
+        </svg>
+        Read my blog
+      </a>
+      <div class="status">
+        <span class="status-indicator" [class]="portfolioService.connectionStatus()"></span>
+        {{ portfolioService.connectionStatus() }}
+      </div>
     </div>
   </header>
 
@@ -22,62 +34,75 @@
       </div>
     </div>
 
-    <div class="heatmap-section">
-      <h2>Repository Activity Heatmap</h2>
+    <div class="repositories-section">
+      <div class="section-header">
+        <h2>Repositories</h2>
+        <div class="view-toggle">
+          <button 
+            class="toggle-btn" 
+            [class.active]="viewMode() === 'heatmap'"
+            (click)="setViewMode('heatmap')">
+            Heatmap
+          </button>
+          <button 
+            class="toggle-btn" 
+            [class.active]="viewMode() === 'details'"
+            (click)="setViewMode('details')">
+            Details
+          </button>
+        </div>
+      </div>
+
       @if (portfolioService.commitData().length === 0) {
         <p class="no-data">Loading commit data...</p>
       } @else {
-        <div class="heatmap-container">
-          <div class="heatmap-grid">
-            @for (repo of getSortedRepositories(); track repo.id) {
-              <div class="heatmap-cell" 
-                   [style.background-color]="getHeatmapColor(repo.commitCount)"
-                   [title]="repo.repositoryName + ': ' + repo.commitCount + ' commits'">
-                <div class="heatmap-label">{{ repo.repositoryName }}</div>
-                <div class="heatmap-count">{{ repo.commitCount }}</div>
+        @if (viewMode() === 'heatmap') {
+          <div class="heatmap-container">
+            <div class="heatmap-grid">
+              @for (repo of getSortedRepositories(); track repo.id) {
+                <div class="heatmap-cell" 
+                     [style.background-color]="getHeatmapColor(repo.commitCount)"
+                     [title]="repo.repositoryName + ': ' + repo.commitCount + ' commits'"
+                     (click)="openRepository(repo.repositoryUrl)">
+                  <div class="heatmap-label">{{ repo.repositoryName }}</div>
+                  <div class="heatmap-count">{{ repo.commitCount }}</div>
+                </div>
+              }
+            </div>
+            <div class="heatmap-legend">
+              <span class="legend-label">Less Active</span>
+              <div class="legend-colors">
+                <div class="legend-color" style="background-color: #f8f9fa;"></div>
+                <div class="legend-color" style="background-color: #e3f2fd;"></div>
+                <div class="legend-color" style="background-color: #bbdefb;"></div>
+                <div class="legend-color" style="background-color: #90caf9;"></div>
+                <div class="legend-color" style="background-color: #64b5f6;"></div>
+              </div>
+              <span class="legend-label">More Active</span>
+            </div>
+          </div>
+        } @else {
+          <div class="repo-list">
+            @for (repo of portfolioService.commitData(); track repo.id) {
+              <div class="repo-card">
+                <h4>
+                  <a [href]="repo.repositoryUrl" target="_blank" rel="noopener noreferrer" class="repo-link">
+                    {{ repo.repositoryName }}
+                    <svg class="external-link-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                      <polyline points="15,3 21,3 21,9"></polyline>
+                      <line x1="10" y1="14" x2="21" y2="3"></line>
+                    </svg>
+                  </a>
+                </h4>
+                <div class="commit-count">{{ repo.commitCount }} commits</div>
+                <div class="last-updated">Updated: {{ formatDate(repo.lastUpdated) }}</div>
               </div>
             }
           </div>
-          <div class="heatmap-legend">
-            <span class="legend-label">Less Active</span>
-            <div class="legend-colors">
-              <div class="legend-color" style="background-color: #f8f9fa;"></div>
-              <div class="legend-color" style="background-color: #e3f2fd;"></div>
-              <div class="legend-color" style="background-color: #bbdefb;"></div>
-              <div class="legend-color" style="background-color: #90caf9;"></div>
-              <div class="legend-color" style="background-color: #64b5f6;"></div>
-            </div>
-            <span class="legend-label">More Active</span>
-          </div>
-        </div>
+        }
       }
     </div>
-
-    <div class="repositories">
-      <h2>Repository Details</h2>
-      @if (portfolioService.commitData().length === 0) {
-        <p class="no-data">Loading commit data...</p>
-      } @else {
-        <div class="repo-list">
-          @for (repo of portfolioService.commitData(); track repo.id) {
-            <div class="repo-card">
-              <h4>
-                <a [href]="repo.repositoryUrl" target="_blank" rel="noopener noreferrer" class="repo-link">
-                  {{ repo.repositoryName }}
-                  <svg class="external-link-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                    <polyline points="15,3 21,3 21,9"></polyline>
-                    <line x1="10" y1="14" x2="21" y2="3"></line>
-                  </svg>
-                </a>
-              </h4>
-              <div class="commit-count">{{ repo.commitCount }} commits</div>
-              <div class="last-updated">Updated: {{ formatDate(repo.lastUpdated) }}</div>
-            </div>
-          }
-        </div>
-      }
-  </div>
 
 </main>
         </div>

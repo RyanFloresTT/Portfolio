@@ -1,25 +1,81 @@
-﻿**/.dockerignore
-**/.env
+﻿# Version control
 **/.git
 **/.gitignore
-**/.project
-**/.settings
-**/.toolstarget
+
+# IDE files
 **/.vs
 **/.vscode
 **/.idea
+**/.project
+**/.settings
+**/.toolstarget
 **/*.*proj.user
-**/*.dbmdl
-**/*.jfm
-**/azds.yaml
+
+# Build artifacts
 **/bin
-**/charts
+**/obj
+**/node_modules
+**/dist
+**/out
+**/target
+
+# Logs
+**/npm-debug.log
+**/yarn-error.log
+**/lerna-debug.log
+
+# Runtime data
+**/pids
+**/*.pid
+**/*.seed
+**/*.pid.lock
+
+# Coverage directory used by tools like istanbul
+**/coverage
+**/.nyc_output
+
+# Dependency directories
+**/jspm_packages/
+
+# Optional npm cache directory
+**/.npm
+
+# Optional REPL history
+**/.node_repl_history
+
+# Output of 'npm pack'
+**/*.tgz
+
+# Yarn Integrity file
+**/.yarn-integrity
+
+# dotenv environment variables file
+**/.env
+**/.env.local
+**/.env.development.local
+**/.env.test.local
+**/.env.production.local
+
+# Docker files
+**/.dockerignore
 **/docker-compose*
 **/Dockerfile*
-**/node_modules
-**/npm-debug.log
-**/obj
+
+# Documentation
+**/README.md
+**/LICENSE
+**/*.md
+
+# Kubernetes
+**/k8s
+**/charts
 **/secrets.dev.yaml
 **/values.dev.yaml
-LICENSE
-README.md
+**/azds.yaml
+
+# Misc
+**/*.dbmdl
+**/*.jfm
+
+# Project specific
+BackgroundWorkers/

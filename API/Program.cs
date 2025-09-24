@@ -77,7 +77,7 @@ app.MapGet("/health/ollama", async (IHttpClientFactory httpClientFactory, IConfi
     catch (Exception ex)
     {
         return Results.Ok(new { 
-            status = "unhealthy", 
+            status = "unhealthy",
             error = ex.Message,
             ollamaUrl = config["Ollama:BaseUrl"] ?? "http://127.0.0.1:11434"
         });

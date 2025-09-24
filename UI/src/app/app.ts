@@ -11,6 +11,7 @@ import { PortfolioService, CommitData } from './services/portfolio.service';
 export class App implements OnInit {
   protected readonly title = signal('Portfolio Dashboard');
   public displaySummary = signal('');
+  protected readonly viewMode = signal<'heatmap' | 'details'>('heatmap');
 
   constructor(public portfolioService: PortfolioService) {
     // Watch for summary changes and trigger typewriter effect
@@ -48,6 +49,14 @@ export class App implements OnInit {
     if (intensity <= 0.4) return '#bbdefb';
     if (intensity <= 0.6) return '#90caf9';
     return '#64b5f6';
+  }
+
+  setViewMode(mode: 'heatmap' | 'details'): void {
+    this.viewMode.set(mode);
+  }
+
+  openRepository(url: string): void {
+    window.open(url, '_blank', 'noopener,noreferrer');
   }
 
   private typewriterEffect(text: string) {
