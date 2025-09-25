@@ -45,6 +45,7 @@ jobs:
           type=raw,value=latest,enable={{is_default_branch}}
 
     - name: Build and push API image
+      id: build-api
       uses: docker/build-push-action@v5
       with:
         context: .
@@ -84,7 +85,7 @@ jobs:
     - name: Update API deployment
       run: |
         # Get the SHA digest from the build step
-        SHA_DIGEST="${{ steps.meta-api.outputs.digest }}"
+        SHA_DIGEST="${{ steps.build-api.outputs.digest }}"
         
         # Update API deployment with the SHA digest
         kubectl set image deployment/portfolio-api api=${{ env.REGISTRY }}/${{ env.REGISTRY_NAME }}/portfolio-api@${SHA_DIGEST} -n portfolio
