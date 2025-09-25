@@ -70,32 +70,17 @@ public class GitHubDataService : BackgroundService
             try
             {
                 var since = periodStart.ToString("o");
-                var commitsUrl = repo.CommitsUrl?.Replace("{/sha}", $"?since={since}");
-
-                if (string.IsNullOrEmpty(commitsUrl))
-                    continue;
-                    
-                var commitsResponse = await client.GetAsync(commitsUrl);
-
-                switch (commitsResponse.StatusCode)
-                {
-                    case HttpStatusCode.Conflict:
-                    case HttpStatusCode.UnavailableForLegalReasons:
-                        continue;
-                }
-
-                commitsResponse.EnsureSuccessStatusCode();
-                var commits = await commitsResponse.Content.ReadFromJsonAsync<List<GitHubCommit>>();
-
-                if (commits?.Count > 0)
+                var allCommits = await FetchAllCommitsForRepository(client, repo, since);
+                
+                if (allCommits?.Count > 0)
                 {
                     commitDataList.Add(new CommitData
                     {
                         Id = repo.Name?.GetHashCode() ?? 0, // Generate stable unique ID based on repo name
                         RepositoryName = repo.Name ?? string.Empty,
                         RepositoryUrl = repo.HtmlUrl ?? string.Empty,
-                        CommitCount = commits.Count,
-                        LastUpdated = commits.Max(c => c.Commit?.Author?.Date ?? DateTime.MinValue),
+                        CommitCount = allCommits.Count,
+                        LastUpdated = allCommits.Max(c => c.Commit?.Author?.Date ?? DateTime.MinValue),
                         PeriodStart = periodStart,
                         PeriodEnd = periodEnd
                     });
@@ -123,5 +108,65 @@ public class GitHubDataService : BackgroundService
             
             _logger.LogInformation("Updated commit data for {Count} repositories", commitDataList.Count);
         }
+    }
+
+    private async Task<List<GitHubCommit>?> FetchAllCommitsForRepository(HttpClient client, GitHubRepository repo, string since)
+    {
+        var allCommits = new List<GitHubCommit>();
+        var page = 1;
+        const int perPage = 100; // Maximum allowed by GitHub API
+        
+        while (true)
+        {
+            try
+            {
+                var commitsUrl = repo.CommitsUrl?.Replace("{/sha}", $"?since={since}&per_page={perPage}&page={page}");
+                
+                if (string.IsNullOrEmpty(commitsUrl))
+                    break;
+                    
+                var commitsResponse = await client.GetAsync(commitsUrl);
+
+                switch (commitsResponse.StatusCode)
+                {
+                    case HttpStatusCode.Conflict:
+                    case HttpStatusCode.UnavailableForLegalReasons:
+                        return allCommits.Any() ? allCommits : null;
+                }
+
+                commitsResponse.EnsureSuccessStatusCode();
+                var commits = await commitsResponse.Content.ReadFromJsonAsync<List<GitHubCommit>>();
+
+                if (commits == null || commits.Count == 0)
+                {
+                    // No more commits on this page, we're done
+                    break;
+                }
+
+                allCommits.AddRange(commits);
+                
+                // If we got fewer commits than requested, we've reached the end
+                if (commits.Count < perPage)
+                {
+                    break;
+                }
+                
+                page++;
+                
+                // Safety check to prevent infinite loops (GitHub API has limits)
+                if (page > 100)
+                {
+                    _logger.LogWarning("Reached maximum page limit for repository {RepositoryName}", repo.Name);
+                    break;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to fetch commits for repository {RepositoryName} on page {Page}", repo.Name, page);
+                break;
+            }
+        }
+        
+        return allCommits.Any() ? allCommits : null;
     }
 }

@@ -245,22 +245,17 @@ Based on these commits, describe what I've been building and fixing. Be specific
             var periodStart = DateTime.UtcNow.AddDays(-90);
             var since = periodStart.ToString("o");
             
-            // Get commits for the specific repository
-            var commitsUrl = $"https://api.github.com/repos/ryanflorestt/{repositoryName}/commits?since={since}&per_page=10";
-            var response = await client.GetAsync(commitsUrl);
+            // Get all commits for the specific repository within the time period
+            var allCommits = await FetchAllCommitsForRepository(client, repositoryName, since);
             
-            if (response.IsSuccessStatusCode)
+            if (allCommits?.Any() == true)
             {
-                var commits = await response.Content.ReadFromJsonAsync<List<GitHubCommit>>();
-                if (commits?.Any() == true)
-                {
-                    return commits
-                        .Where(c => c.Commit?.Message != null)
-                        .Select(c => c.Commit?.Message?.Split('\n')[0] ?? string.Empty) // Get first line of commit message
-                        .Where(msg => !string.IsNullOrWhiteSpace(msg))
-                        .Take(5) // Limit to 5 most recent
-                        .ToList();
-                }
+                return allCommits
+                    .Where(c => c.Commit?.Message != null)
+                    .Select(c => c.Commit?.Message?.Split('\n')[0] ?? string.Empty) // Get first line of commit message
+                    .Where(msg => !string.IsNullOrWhiteSpace(msg))
+                    .Take(5) // Limit to 5 most recent for summary
+                    .ToList();
             }
         }
         catch (Exception ex)
@@ -269,6 +264,63 @@ Based on these commits, describe what I've been building and fixing. Be specific
         }
         
         return null;
+    }
+
+    private async Task<List<GitHubCommit>?> FetchAllCommitsForRepository(HttpClient client, string repositoryName, string since)
+    {
+        var allCommits = new List<GitHubCommit>();
+        var page = 1;
+        const int perPage = 100; // Maximum allowed by GitHub API
+        
+        while (true)
+        {
+            try
+            {
+                var commitsUrl = $"https://api.github.com/repos/ryanflorestt/{repositoryName}/commits?since={since}&per_page={perPage}&page={page}";
+                var response = await client.GetAsync(commitsUrl);
+                
+                if (!response.IsSuccessStatusCode)
+                {
+                    if (page == 1)
+                    {
+                        _logger.LogWarning("Failed to fetch commits for repository {RepositoryName}: {StatusCode}", repositoryName, response.StatusCode);
+                    }
+                    break;
+                }
+                
+                var commits = await response.Content.ReadFromJsonAsync<List<GitHubCommit>>();
+
+                if (commits == null || commits.Count == 0)
+                {
+                    // No more commits on this page, we're done
+                    break;
+                }
+
+                allCommits.AddRange(commits);
+                
+                // If we got fewer commits than requested, we've reached the end
+                if (commits.Count < perPage)
+                {
+                    break;
+                }
+                
+                page++;
+                
+                // Safety check to prevent infinite loops
+                if (page > 100)
+                {
+                    _logger.LogWarning("Reached maximum page limit for repository {RepositoryName}", repositoryName);
+                    break;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to fetch commits for repository {RepositoryName} on page {Page}", repositoryName, page);
+                break;
+            }
+        }
+        
+        return allCommits.Any() ? allCommits : null;
     }
 }
 
