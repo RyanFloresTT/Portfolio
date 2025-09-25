@@ -6,7 +6,7 @@ services:
   api:
     build:
       context: .
-      dockerfile: API/Dockerfile
+      dockerfile: API/Dockerfile.dev
     ports:
       - "30081:8080"
     environment:
@@ -17,9 +17,12 @@ services:
       - SignalR__HubUrl=http://localhost:30081/portfolioHub
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
+      - DOTNET_USE_POLLING_FILE_WATCHER=true
     volumes:
-      # Mount source code for hot reload (if using dotnet watch)
-      - ./API:/src:ro
+      # Mount source code for hot reload
+      - ./API:/src
+      - /src/bin
+      - /src/obj
     depends_on:
       - redis
       - ollama
@@ -27,14 +30,17 @@ services:
   frontend:
     build:
       context: .
-      dockerfile: UI/Dockerfile
+      dockerfile: UI/Dockerfile.dev
     ports:
-      - "30082:80"
+      - "30082:4200"  # Angular dev server port
     volumes:
-      # Mount source code for development
-      - ./UI/src:/app/src:ro
+      # Mount source code for hot reload
+      - ./UI:/app
+      - /app/node_modules
     depends_on:
       - api
+    environment:
+      - NODE_ENV=development
 
   # Optional: Add a local database for development
   # postgres:
