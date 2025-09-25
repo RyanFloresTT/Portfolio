@@ -42,9 +42,6 @@ jobs:
         images: ${{ env.REGISTRY }}/${{ env.REGISTRY_NAME }}/${{ env.API_IMAGE }}
         tags: |
           type=ref,event=branch
-          type=ref,event=pr
-          type=sha,prefix={{branch}}-
-          type=raw,value=latest,enable={{is_default_branch}}
 
     - name: Build and push API image
       uses: docker/build-push-action@v5
@@ -86,7 +83,7 @@ jobs:
     - name: Update API deployment
       run: |
         # Update API deployment
-        kubectl set image deployment/portfolio-api api=${{ env.REGISTRY }}/${{ env.REGISTRY_NAME }}/portfolio-api:latest -n portfolio
+        kubectl set image deployment/portfolio-api api=${{ env.REGISTRY }}/${{ env.REGISTRY_NAME }}/portfolio-api:main -n portfolio
         
         # Wait for rollout to complete
         kubectl rollout status deployment/portfolio-api -n portfolio --timeout=300s

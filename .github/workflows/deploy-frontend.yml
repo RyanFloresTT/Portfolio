@@ -42,9 +42,6 @@ jobs:
         images: ${{ env.REGISTRY }}/${{ env.REGISTRY_NAME }}/${{ env.FRONTEND_IMAGE }}
         tags: |
           type=ref,event=branch
-          type=ref,event=pr
-          type=sha,prefix={{branch}}-
-          type=raw,value=latest,enable={{is_default_branch}}
 
     - name: Build and push Frontend image
       uses: docker/build-push-action@v5
@@ -86,7 +83,7 @@ jobs:
     - name: Update Frontend deployment
       run: |
         # Update Frontend deployment
-        kubectl set image deployment/portfolio-frontend frontend=${{ env.REGISTRY }}/${{ env.REGISTRY_NAME }}/portfolio-frontend:latest -n portfolio
+        kubectl set image deployment/portfolio-frontend frontend=${{ env.REGISTRY }}/${{ env.REGISTRY_NAME }}/portfolio-frontend:main -n portfolio
         
         # Wait for rollout to complete
         kubectl rollout status deployment/portfolio-frontend -n portfolio --timeout=300s
