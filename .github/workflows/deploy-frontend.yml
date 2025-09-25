@@ -42,7 +42,6 @@ jobs:
         images: ${{ env.REGISTRY }}/${{ env.REGISTRY_NAME }}/${{ env.FRONTEND_IMAGE }}
         tags: |
           type=ref,event=branch
-          type=sha,prefix={{branch}}-
           type=raw,value=latest,enable={{is_default_branch}}
 
     - name: Build and push Frontend image
@@ -84,11 +83,11 @@ jobs:
 
     - name: Update Frontend deployment
       run: |
-        # Get the SHA tag for this commit
-        SHA_TAG="main-${{ github.sha }}"
+        # Get the SHA digest from the build step
+        SHA_DIGEST="${{ steps.meta-frontend.outputs.digest }}"
         
-        # Update Frontend deployment with the specific SHA tag
-        kubectl set image deployment/portfolio-frontend frontend=${{ env.REGISTRY }}/${{ env.REGISTRY_NAME }}/portfolio-frontend:${SHA_TAG} -n portfolio
+        # Update Frontend deployment with the SHA digest
+        kubectl set image deployment/portfolio-frontend frontend=${{ env.REGISTRY }}/${{ env.REGISTRY_NAME }}/portfolio-frontend@${SHA_DIGEST} -n portfolio
         
         # Wait for rollout to complete
         kubectl rollout status deployment/portfolio-frontend -n portfolio --timeout=300s
