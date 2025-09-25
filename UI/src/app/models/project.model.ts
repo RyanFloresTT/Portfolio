@@ -16,6 +16,56 @@ export interface Project {
   screenshots?: string[];
   challenges?: string[];
   achievements?: string[];
+  // New detailed section properties
+  hasDetailedView?: boolean;
+  blogPostUrl?: string;
+  detailedContent?: ProjectDetailedContent;
+}
+
+export interface ProjectDetailedContent {
+  overview: string;
+  problemStatement?: string;
+  solution?: string;
+  architecture?: string;
+  keyFeatures?: string[];
+  technicalDecisions?: TechnicalDecision[];
+  lessonsLearned?: string[];
+  futureImprovements?: string[];
+  metrics?: ProjectMetric[];
+  timeline?: ProjectMilestone[];
+  teamSize?: number;
+  myRole?: string;
+  codeSnippets?: CodeSnippet[];
+  additionalScreenshots?: string[];
+  relatedProjects?: string[];
+}
+
+export interface TechnicalDecision {
+  decision: string;
+  reasoning: string;
+  alternatives?: string[];
+  impact?: string;
+}
+
+export interface ProjectMetric {
+  name: string;
+  value: string;
+  description?: string;
+  improvement?: string;
+}
+
+export interface ProjectMilestone {
+  date: Date;
+  title: string;
+  description: string;
+  completed: boolean;
+}
+
+export interface CodeSnippet {
+  title: string;
+  language: string;
+  code: string;
+  description?: string;
 }
 
 export interface ProjectCategory {

@@ -6,87 +6,7 @@ import { PortfolioService } from '../../services/portfolio.service';
   selector: 'app-home',
   standalone: true,
   imports: [CommonModule],
-  template: `
-    <div class="min-h-screen bg-gray-50">
-      <div class="max-w-6xl mx-auto px-6 py-8">
-        <!-- Header -->
-        <header class="mb-10 pb-8 border-b-2 border-gray-200">
-          <!-- Hero Section -->
-          <div class="text-center mb-8">
-            <h1 class="text-5xl md:text-6xl font-bold mb-3 bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
-              Hi, I'm Ryan
-            </h1>
-            <p class="text-xl text-gray-600 font-light tracking-wide">
-              Full-Stack Developer & Tech Enthusiast
-            </p>
-          </div>
-          
-          <!-- Intro Section -->
-          <div class="space-y-6">
-            <!-- Personal Summary -->
-            <div class="relative bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-xl border-l-4 border-blue-600 shadow-lg overflow-hidden">
-              <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-blue-100 to-green-100 rounded-full transform translate-x-8 -translate-y-8"></div>
-              <p class="relative z-10 text-lg text-gray-700 leading-relaxed">
-                {{ displaySummary() }}<span class="animate-pulse text-blue-600 font-bold">|</span>
-              </p>
-            </div>
-          </div>
-        </header>
-
-        <main>
-          <!-- Stats Grid -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-            <div class="bg-gradient-to-r from-blue-50 to-blue-100 p-6 rounded-xl border-l-4 border-blue-600">
-              <h3 class="text-gray-700 font-medium mb-2">Total Repositories</h3>
-              <p class="text-4xl font-bold text-blue-600">{{ portfolioService.commitData().length }}</p>
-            </div>
-            <div class="bg-gradient-to-r from-green-50 to-green-100 p-6 rounded-xl border-l-4 border-green-600">
-              <h3 class="text-gray-700 font-medium mb-2">Total Commits (30 days)</h3>
-              <p class="text-4xl font-bold text-green-600">{{ getTotalCommits() }}</p>
-            </div>
-          </div>
-
-          <!-- What I've Been Working On Section -->
-          <div class="mb-10">
-            <h2 class="text-3xl font-bold text-gray-800 mb-6">What I've Been Working On</h2>
-
-            @if (portfolioService.commitData().length === 0) {
-              <div class="text-center py-12">
-                <p class="text-gray-500 italic text-lg">Loading commit data...</p>
-              </div>
-            } @else {
-              <!-- Repository Heatmap -->
-              <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
-                  @for (repo of getSortedRepositories(); track repo.id) {
-                    <div class="border border-gray-200 rounded-lg p-4 text-center transition-all duration-200 hover:-translate-y-1 hover:shadow-md cursor-pointer min-h-20 flex flex-col justify-center"
-                         [style.background-color]="getHeatmapColor(repo.commitCount)"
-                         [title]="repo.repositoryName + ': ' + repo.commitCount + ' commits'"
-                         (click)="openRepository(repo.repositoryUrl)">
-                      <div class="text-sm font-semibold text-gray-800 mb-1 break-words">{{ repo.repositoryName }}</div>
-                      <div class="text-lg font-bold text-gray-800">{{ repo.commitCount }}</div>
-                    </div>
-                  }
-                </div>
-                <!-- Legend -->
-                <div class="flex items-center justify-center gap-4 text-sm text-gray-600">
-                  <span>Less Active</span>
-                  <div class="flex gap-1">
-                    <div class="w-4 h-4 rounded border border-gray-200 bg-gray-100"></div>
-                    <div class="w-4 h-4 rounded border border-gray-200 bg-blue-100"></div>
-                    <div class="w-4 h-4 rounded border border-gray-200 bg-blue-200"></div>
-                    <div class="w-4 h-4 rounded border border-gray-200 bg-blue-300"></div>
-                    <div class="w-4 h-4 rounded border border-gray-200 bg-blue-400"></div>
-                  </div>
-                  <span>More Active</span>
-                </div>
-              </div>
-            }
-          </div>
-        </main>
-      </div>
-    </div>
-  `
+  templateUrl: './home.component.html'
 })
 export class HomeComponent implements OnInit {
   public displaySummary = signal('');
@@ -118,11 +38,11 @@ export class HomeComponent implements OnInit {
     const maxCommits = Math.max(...this.portfolioService.commitData().map(r => r.commitCount));
     const intensity = commitCount / maxCommits;
     
-    if (intensity === 0) return '#f8f9fa';
-    if (intensity <= 0.2) return '#e3f2fd';
-    if (intensity <= 0.4) return '#bbdefb';
-    if (intensity <= 0.6) return '#90caf9';
-    return '#64b5f6';
+    if (intensity === 0) return '#374151'; // dark gray
+    if (intensity <= 0.2) return '#1e3a8a'; // dark blue
+    if (intensity <= 0.4) return '#2563eb'; // blue
+    if (intensity <= 0.6) return '#3b82f6'; // lighter blue
+    return '#60a5fa'; // light blue
   }
 
   openRepository(url: string): void {
