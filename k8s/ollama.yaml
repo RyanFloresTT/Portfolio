@@ -20,11 +20,11 @@ spec:
         - containerPort: 11434
         resources:
           requests:
-            memory: "2Gi"
-            cpu: "500m"
+            memory: "512Mi"
+            cpu: "200m"
           limits:
-            memory: "4Gi"
-            cpu: "1000m"
+            memory: "1Gi"
+            cpu: "500m"
         env:
         - name: OLLAMA_HOST
           value: "0.0.0.0"
