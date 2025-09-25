@@ -159,7 +159,7 @@ Based on these commits, describe what I've been building and fixing. Be specific
             }
 
             // Fallback if API fails
-            return $"Hi, I'm Ryan! I've been actively working on {string.Join(", ", recentRepos.Take(3))} and other exciting projects. Check out my repositories to see what I've been building!";
+            return $"Hi, I'm Ryan! I've been actively working on {string.Join(", ", recentRepos.Take(3).Select(r => r.RepositoryName))} and other exciting projects. Check out my repositories to see what I've been building!";
         }
         catch (Exception ex)
         {
