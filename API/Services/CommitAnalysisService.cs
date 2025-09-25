@@ -256,7 +256,7 @@ Based on these commits, describe what I've been building and fixing. Be specific
                 {
                     return commits
                         .Where(c => c.Commit?.Message != null)
-                        .Select(c => c.Commit.Message.Split('\n')[0]) // Get first line of commit message
+                        .Select(c => c.Commit?.Message?.Split('\n')[0] ?? string.Empty) // Get first line of commit message
                         .Where(msg => !string.IsNullOrWhiteSpace(msg))
                         .Take(5) // Limit to 5 most recent
                         .ToList();
