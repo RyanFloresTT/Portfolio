@@ -85,8 +85,8 @@ jobs:
 
     - name: Update API deployment
       run: |
-        # Update API deployment with the latest tag
-        kubectl set image deployment/portfolio-api api=${{ env.REGISTRY }}/${{ env.REGISTRY_NAME }}/portfolio-api:latest -n portfolio
+        # Force restart to pull the latest image
+        kubectl rollout restart deployment/portfolio-api -n portfolio
         
         # Wait for rollout to complete
         kubectl rollout status deployment/portfolio-api -n portfolio --timeout=300s

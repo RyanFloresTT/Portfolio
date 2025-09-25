@@ -85,8 +85,8 @@ jobs:
 
     - name: Update Frontend deployment
       run: |
-        # Update Frontend deployment with the latest tag
-        kubectl set image deployment/portfolio-frontend frontend=${{ env.REGISTRY }}/${{ env.REGISTRY_NAME }}/portfolio-frontend:latest -n portfolio
+        # Force restart to pull the latest image
+        kubectl rollout restart deployment/portfolio-frontend -n portfolio
         
         # Wait for rollout to complete
         kubectl rollout status deployment/portfolio-frontend -n portfolio --timeout=300s
