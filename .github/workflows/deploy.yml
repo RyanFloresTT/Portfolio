@@ -7,7 +7,8 @@ on:
     branches: [ master ]
 
 env:
-  REGISTRY: registry.digitalocean.com/rfportfoliocr
+  REGISTRY: registry.digitalocean.com
+  REGISTRY_NAME: rfportfoliocr
   API_IMAGE: portfolio-api
   FRONTEND_IMAGE: portfolio-frontend
 
@@ -33,7 +34,7 @@ jobs:
       id: meta-api
       uses: docker/metadata-action@v5
       with:
-        images: ${{ env.REGISTRY }}/${{ secrets.DIGITALOCEAN_REGISTRY_NAME }}/${{ env.API_IMAGE }}
+        images: ${{ env.REGISTRY }}/${{ env.REGISTRY_NAME }}/${{ env.API_IMAGE }}
         tags: |
           type=ref,event=branch
           type=ref,event=pr
@@ -44,7 +45,7 @@ jobs:
       id: meta-frontend
       uses: docker/metadata-action@v5
       with:
-        images: ${{ env.REGISTRY }}/${{ secrets.DIGITALOCEAN_REGISTRY_NAME }}/${{ env.FRONTEND_IMAGE }}
+        images: ${{ env.REGISTRY }}/${{ env.REGISTRY_NAME }}/${{ env.FRONTEND_IMAGE }}
         tags: |
           type=ref,event=branch
           type=ref,event=pr
@@ -103,10 +104,10 @@ jobs:
     - name: Update Kubernetes deployments
       run: |
         # Update API deployment
-        kubectl set image deployment/portfolio-api api=registry.digitalocean.com/${{ secrets.DIGITALOCEAN_REGISTRY_NAME }}/portfolio-api:latest -n portfolio
+        kubectl set image deployment/portfolio-api api=${{ env.REGISTRY }}/${{ env.REGISTRY_NAME }}/portfolio-api:latest -n portfolio
         
         # Update Frontend deployment
-        kubectl set image deployment/portfolio-frontend frontend=registry.digitalocean.com/${{ secrets.DIGITALOCEAN_REGISTRY_NAME }}/portfolio-frontend:latest -n portfolio
+        kubectl set image deployment/portfolio-frontend frontend=${{ env.REGISTRY }}/${{ env.REGISTRY_NAME }}/portfolio-frontend:latest -n portfolio
         
         # Wait for rollout to complete
         kubectl rollout status deployment/portfolio-api -n portfolio --timeout=300s
