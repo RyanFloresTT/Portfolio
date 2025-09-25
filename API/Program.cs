@@ -1,10 +1,12 @@
 using API.Models;
 using API.Services;
 using API.Hubs;
-using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+// Add environment variable support
+builder.Configuration.AddEnvironmentVariables();
 
 builder.Services.AddOpenApi();
 
@@ -35,8 +37,16 @@ builder.Services.AddSingleton<GitHubDataService>();
 
 builder.Services.AddHttpClient("GitHub", client => {
     client.DefaultRequestHeaders.UserAgent.ParseAdd("rryanflorres portfolio API");
-    client.DefaultRequestHeaders.Authorization =
-        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", builder.Configuration["GitHub:Token"]);
+    
+    // Read GitHub token from environment variable first, then fallback to config
+    var githubToken = Environment.GetEnvironmentVariable("GH_TOKEN") 
+                     ?? builder.Configuration["GitHub:Token"];
+    
+    if (!string.IsNullOrEmpty(githubToken))
+    {
+        client.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", githubToken);
+    }
 });
 
 WebApplication app = builder.Build();
