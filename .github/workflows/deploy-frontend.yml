@@ -45,6 +45,7 @@ jobs:
           type=raw,value=latest,enable={{is_default_branch}}
 
     - name: Build and push Frontend image
+      id: build-frontend
       uses: docker/build-push-action@v5
       with:
         context: .
@@ -84,7 +85,7 @@ jobs:
     - name: Update Frontend deployment
       run: |
         # Get the SHA digest from the build step
-        SHA_DIGEST="${{ steps.meta-frontend.outputs.digest }}"
+        SHA_DIGEST="${{ steps.build-frontend.outputs.digest }}"
         
         # Update Frontend deployment with the SHA digest
         kubectl set image deployment/portfolio-frontend frontend=${{ env.REGISTRY }}/${{ env.REGISTRY_NAME }}/portfolio-frontend@${SHA_DIGEST} -n portfolio
