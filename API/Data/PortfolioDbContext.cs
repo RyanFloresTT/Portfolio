@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using API.Models;
+using Portfolio.Shared.Models;
 
 namespace API.Data;
 
