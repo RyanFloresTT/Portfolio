@@ -11,6 +11,7 @@ on:
     paths:
       - 'API/**'
       - '.github/workflows/deploy-api.yml'
+  workflow_dispatch:
 
 env:
   REGISTRY: registry.digitalocean.com
