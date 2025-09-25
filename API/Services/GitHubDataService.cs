@@ -70,8 +70,11 @@ public class GitHubDataService : BackgroundService
             try
             {
                 var since = periodStart.ToString("o");
-                var commitsUrl = repo.CommitsUrl.Replace("{/sha}", $"?since={since}");
+                var commitsUrl = repo.CommitsUrl?.Replace("{/sha}", $"?since={since}");
 
+                if (string.IsNullOrEmpty(commitsUrl))
+                    continue;
+                    
                 var commitsResponse = await client.GetAsync(commitsUrl);
 
                 switch (commitsResponse.StatusCode)
@@ -88,11 +91,11 @@ public class GitHubDataService : BackgroundService
                 {
                     commitDataList.Add(new CommitData
                     {
-                        Id = repo.Name.GetHashCode(), // Generate stable unique ID based on repo name
-                        RepositoryName = repo.Name,
-                        RepositoryUrl = repo.HtmlUrl,
+                        Id = repo.Name?.GetHashCode() ?? 0, // Generate stable unique ID based on repo name
+                        RepositoryName = repo.Name ?? string.Empty,
+                        RepositoryUrl = repo.HtmlUrl ?? string.Empty,
                         CommitCount = commits.Count,
-                        LastUpdated = commits.Max(c => c.Commit.Author.Date),
+                        LastUpdated = commits.Max(c => c.Commit?.Author?.Date ?? DateTime.MinValue),
                         PeriodStart = periodStart,
                         PeriodEnd = periodEnd
                     });
