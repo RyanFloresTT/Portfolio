@@ -42,7 +42,7 @@ jobs:
         images: ${{ env.REGISTRY }}/${{ env.REGISTRY_NAME }}/${{ env.FRONTEND_IMAGE }}
         tags: |
           type=ref,event=branch
-          type=sha,prefix={{branch}}-
+          type=sha,prefix=main-
           type=raw,value=latest,enable={{is_default_branch}}
 
     - name: Build and push Frontend image
