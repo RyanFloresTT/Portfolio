@@ -15,6 +15,7 @@ public class GitHubDataService : BackgroundService
     private readonly IHubContext<PortfolioHub> _hubContext;
     private readonly RedisService _redisService;
     private readonly CommitAnalysisService _commitAnalysisService;
+    private readonly GitHubCommitService _gitHubCommitService;
 
     public GitHubDataService(
         IServiceProvider serviceProvider,
@@ -22,7 +23,8 @@ public class GitHubDataService : BackgroundService
         IConfiguration configuration,
         IHubContext<PortfolioHub> hubContext,
         RedisService redisService,
-        CommitAnalysisService commitAnalysisService)
+        CommitAnalysisService commitAnalysisService,
+        GitHubCommitService gitHubCommitService)
     {
         _serviceProvider = serviceProvider;
         _logger = logger;
@@ -30,6 +32,7 @@ public class GitHubDataService : BackgroundService
         _hubContext = hubContext;
         _redisService = redisService;
         _commitAnalysisService = commitAnalysisService;
+        _gitHubCommitService = gitHubCommitService;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -70,7 +73,7 @@ public class GitHubDataService : BackgroundService
             try
             {
                 var since = periodStart.ToString("o");
-                var allCommits = await FetchAllCommitsForRepository(client, repo, since);
+                var allCommits = await _gitHubCommitService.FetchAllCommitsForRepositoryAsync(client, repo, since);
                 
                 if (allCommits?.Count > 0)
                 {
@@ -110,63 +113,4 @@ public class GitHubDataService : BackgroundService
         }
     }
 
-    private async Task<List<GitHubCommit>?> FetchAllCommitsForRepository(HttpClient client, GitHubRepository repo, string since)
-    {
-        var allCommits = new List<GitHubCommit>();
-        var page = 1;
-        const int perPage = 100; // Maximum allowed by GitHub API
-        
-        while (true)
-        {
-            try
-            {
-                var commitsUrl = repo.CommitsUrl?.Replace("{/sha}", $"?since={since}&per_page={perPage}&page={page}");
-                
-                if (string.IsNullOrEmpty(commitsUrl))
-                    break;
-                    
-                var commitsResponse = await client.GetAsync(commitsUrl);
-
-                switch (commitsResponse.StatusCode)
-                {
-                    case HttpStatusCode.Conflict:
-                    case HttpStatusCode.UnavailableForLegalReasons:
-                        return allCommits.Any() ? allCommits : null;
-                }
-
-                commitsResponse.EnsureSuccessStatusCode();
-                var commits = await commitsResponse.Content.ReadFromJsonAsync<List<GitHubCommit>>();
-
-                if (commits == null || commits.Count == 0)
-                {
-                    // No more commits on this page, we're done
-                    break;
-                }
-
-                allCommits.AddRange(commits);
-                
-                // If we got fewer commits than requested, we've reached the end
-                if (commits.Count < perPage)
-                {
-                    break;
-                }
-                
-                page++;
-                
-                // Safety check to prevent infinite loops (GitHub API has limits)
-                if (page > 100)
-                {
-                    _logger.LogWarning("Reached maximum page limit for repository {RepositoryName}", repo.Name);
-                    break;
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Failed to fetch commits for repository {RepositoryName} on page {Page}", repo.Name, page);
-                break;
-            }
-        }
-        
-        return allCommits.Any() ? allCommits : null;
-    }
 }

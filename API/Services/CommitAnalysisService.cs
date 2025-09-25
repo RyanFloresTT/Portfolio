@@ -14,6 +14,7 @@ public class CommitAnalysisService
     private readonly IConfiguration _configuration;
     private readonly IHubContext<PortfolioHub> _hubContext;
     private readonly IServiceProvider _serviceProvider;
+    private readonly GitHubCommitService _gitHubCommitService;
 
     public CommitAnalysisService(
         IHttpClientFactory httpClientFactory,
@@ -21,7 +22,8 @@ public class CommitAnalysisService
         ILogger<CommitAnalysisService> logger,
         IConfiguration configuration,
         IHubContext<PortfolioHub> hubContext,
-        IServiceProvider serviceProvider)
+        IServiceProvider serviceProvider,
+        GitHubCommitService gitHubCommitService)
     {
         _httpClientFactory = httpClientFactory;
         _redisService = redisService;
@@ -29,6 +31,7 @@ public class CommitAnalysisService
         _configuration = configuration;
         _hubContext = hubContext;
         _serviceProvider = serviceProvider;
+        _gitHubCommitService = gitHubCommitService;
     }
 
     public async Task<string> GetPersonalSummaryAsync()
@@ -246,7 +249,7 @@ Based on these commits, describe what I've been building and fixing. Be specific
             var since = periodStart.ToString("o");
             
             // Get all commits for the specific repository within the time period
-            var allCommits = await FetchAllCommitsForRepository(client, repositoryName, since);
+            var allCommits = await _gitHubCommitService.FetchAllCommitsForRepositoryAsync(client, repositoryName, since);
             
             if (allCommits?.Any() == true)
             {
@@ -266,62 +269,6 @@ Based on these commits, describe what I've been building and fixing. Be specific
         return null;
     }
 
-    private async Task<List<GitHubCommit>?> FetchAllCommitsForRepository(HttpClient client, string repositoryName, string since)
-    {
-        var allCommits = new List<GitHubCommit>();
-        var page = 1;
-        const int perPage = 100; // Maximum allowed by GitHub API
-        
-        while (true)
-        {
-            try
-            {
-                var commitsUrl = $"https://api.github.com/repos/ryanflorestt/{repositoryName}/commits?since={since}&per_page={perPage}&page={page}";
-                var response = await client.GetAsync(commitsUrl);
-                
-                if (!response.IsSuccessStatusCode)
-                {
-                    if (page == 1)
-                    {
-                        _logger.LogWarning("Failed to fetch commits for repository {RepositoryName}: {StatusCode}", repositoryName, response.StatusCode);
-                    }
-                    break;
-                }
-                
-                var commits = await response.Content.ReadFromJsonAsync<List<GitHubCommit>>();
-
-                if (commits == null || commits.Count == 0)
-                {
-                    // No more commits on this page, we're done
-                    break;
-                }
-
-                allCommits.AddRange(commits);
-                
-                // If we got fewer commits than requested, we've reached the end
-                if (commits.Count < perPage)
-                {
-                    break;
-                }
-                
-                page++;
-                
-                // Safety check to prevent infinite loops
-                if (page > 100)
-                {
-                    _logger.LogWarning("Reached maximum page limit for repository {RepositoryName}", repositoryName);
-                    break;
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Failed to fetch commits for repository {RepositoryName} on page {Page}", repositoryName, page);
-                break;
-            }
-        }
-        
-        return allCommits.Any() ? allCommits : null;
-    }
 }
 
 public class OllamaResponse
