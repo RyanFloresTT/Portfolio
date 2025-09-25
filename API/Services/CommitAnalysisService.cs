@@ -112,7 +112,7 @@ Recent commits:
 
 Based on these commits, describe what I've been building and fixing. Be specific about the work done.";
 
-            var model = _configuration["Ollama:Model"] ?? "llama3.2";
+            var model = _configuration["Ollama:Model"] ?? "latest";
 
                     var client = _httpClientFactory.CreateClient();
                     client.Timeout = TimeSpan.FromMinutes(2);
