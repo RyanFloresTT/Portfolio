@@ -85,11 +85,8 @@ jobs:
 
     - name: Update Frontend deployment
       run: |
-        # Use the SHA tag (e.g., main-abc1234)
-        SHA_TAG="main-${{ github.sha }}"
-        
-        # Update Frontend deployment with the SHA tag
-        kubectl set image deployment/portfolio-frontend frontend=${{ env.REGISTRY }}/${{ env.REGISTRY_NAME }}/portfolio-frontend:${SHA_TAG} -n portfolio
+        # Update Frontend deployment with the latest tag
+        kubectl set image deployment/portfolio-frontend frontend=${{ env.REGISTRY }}/${{ env.REGISTRY_NAME }}/portfolio-frontend:latest -n portfolio
         
         # Wait for rollout to complete
         kubectl rollout status deployment/portfolio-frontend -n portfolio --timeout=300s

@@ -34,6 +34,7 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddHostedService<GitHubDataService>();
 builder.Services.AddSingleton<GitHubDataService>();
+builder.Services.AddScoped<GitHubCommitService>();
 
 builder.Services.AddHttpClient("GitHub", client => {
     client.DefaultRequestHeaders.UserAgent.ParseAdd("rryanflorres portfolio API");

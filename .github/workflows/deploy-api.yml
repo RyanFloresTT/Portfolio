@@ -85,11 +85,8 @@ jobs:
 
     - name: Update API deployment
       run: |
-        # Use the SHA tag (e.g., main-abc1234)
-        SHA_TAG="main-${{ github.sha }}"
-        
-        # Update API deployment with the SHA tag
-        kubectl set image deployment/portfolio-api api=${{ env.REGISTRY }}/${{ env.REGISTRY_NAME }}/portfolio-api:${SHA_TAG} -n portfolio
+        # Update API deployment with the latest tag
+        kubectl set image deployment/portfolio-api api=${{ env.REGISTRY }}/${{ env.REGISTRY_NAME }}/portfolio-api:latest -n portfolio
         
         # Wait for rollout to complete
         kubectl rollout status deployment/portfolio-api -n portfolio --timeout=300s

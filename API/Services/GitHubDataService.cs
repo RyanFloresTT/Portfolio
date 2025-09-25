@@ -15,6 +15,7 @@ public class GitHubDataService : BackgroundService
     private readonly IHubContext<PortfolioHub> _hubContext;
     private readonly RedisService _redisService;
     private readonly CommitAnalysisService _commitAnalysisService;
+    private readonly GitHubCommitService _gitHubCommitService;
 
     public GitHubDataService(
         IServiceProvider serviceProvider,
@@ -22,7 +23,8 @@ public class GitHubDataService : BackgroundService
         IConfiguration configuration,
         IHubContext<PortfolioHub> hubContext,
         RedisService redisService,
-        CommitAnalysisService commitAnalysisService)
+        CommitAnalysisService commitAnalysisService,
+        GitHubCommitService gitHubCommitService)
     {
         _serviceProvider = serviceProvider;
         _logger = logger;
@@ -30,6 +32,7 @@ public class GitHubDataService : BackgroundService
         _hubContext = hubContext;
         _redisService = redisService;
         _commitAnalysisService = commitAnalysisService;
+        _gitHubCommitService = gitHubCommitService;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -70,32 +73,17 @@ public class GitHubDataService : BackgroundService
             try
             {
                 var since = periodStart.ToString("o");
-                var commitsUrl = repo.CommitsUrl?.Replace("{/sha}", $"?since={since}");
-
-                if (string.IsNullOrEmpty(commitsUrl))
-                    continue;
-                    
-                var commitsResponse = await client.GetAsync(commitsUrl);
-
-                switch (commitsResponse.StatusCode)
-                {
-                    case HttpStatusCode.Conflict:
-                    case HttpStatusCode.UnavailableForLegalReasons:
-                        continue;
-                }
-
-                commitsResponse.EnsureSuccessStatusCode();
-                var commits = await commitsResponse.Content.ReadFromJsonAsync<List<GitHubCommit>>();
-
-                if (commits?.Count > 0)
+                var allCommits = await _gitHubCommitService.FetchAllCommitsForRepositoryAsync(client, repo, since);
+                
+                if (allCommits?.Count > 0)
                 {
                     commitDataList.Add(new CommitData
                     {
                         Id = repo.Name?.GetHashCode() ?? 0, // Generate stable unique ID based on repo name
                         RepositoryName = repo.Name ?? string.Empty,
                         RepositoryUrl = repo.HtmlUrl ?? string.Empty,
-                        CommitCount = commits.Count,
-                        LastUpdated = commits.Max(c => c.Commit?.Author?.Date ?? DateTime.MinValue),
+                        CommitCount = allCommits.Count,
+                        LastUpdated = allCommits.Max(c => c.Commit?.Author?.Date ?? DateTime.MinValue),
                         PeriodStart = periodStart,
                         PeriodEnd = periodEnd
                     });
@@ -124,4 +112,5 @@ public class GitHubDataService : BackgroundService
             _logger.LogInformation("Updated commit data for {Count} repositories", commitDataList.Count);
         }
     }
+
 }

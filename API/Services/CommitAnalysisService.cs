@@ -14,6 +14,7 @@ public class CommitAnalysisService
     private readonly IConfiguration _configuration;
     private readonly IHubContext<PortfolioHub> _hubContext;
     private readonly IServiceProvider _serviceProvider;
+    private readonly GitHubCommitService _gitHubCommitService;
 
     public CommitAnalysisService(
         IHttpClientFactory httpClientFactory,
@@ -21,7 +22,8 @@ public class CommitAnalysisService
         ILogger<CommitAnalysisService> logger,
         IConfiguration configuration,
         IHubContext<PortfolioHub> hubContext,
-        IServiceProvider serviceProvider)
+        IServiceProvider serviceProvider,
+        GitHubCommitService gitHubCommitService)
     {
         _httpClientFactory = httpClientFactory;
         _redisService = redisService;
@@ -29,6 +31,7 @@ public class CommitAnalysisService
         _configuration = configuration;
         _hubContext = hubContext;
         _serviceProvider = serviceProvider;
+        _gitHubCommitService = gitHubCommitService;
     }
 
     public async Task<string> GetPersonalSummaryAsync()
@@ -159,7 +162,7 @@ Based on these commits, describe what I've been building and fixing. Be specific
             }
 
             // Fallback if API fails
-            return $"Hi, I'm Ryan! I've been actively working on {string.Join(", ", recentRepos.Take(3))} and other exciting projects. Check out my repositories to see what I've been building!";
+            return $"Hi, I'm Ryan! I've been actively working on {string.Join(", ", recentRepos.Take(3).Select(r => r.RepositoryName))} and other exciting projects. Check out my repositories to see what I've been building!";
         }
         catch (Exception ex)
         {
@@ -245,22 +248,17 @@ Based on these commits, describe what I've been building and fixing. Be specific
             var periodStart = DateTime.UtcNow.AddDays(-90);
             var since = periodStart.ToString("o");
             
-            // Get commits for the specific repository
-            var commitsUrl = $"https://api.github.com/repos/ryanflorestt/{repositoryName}/commits?since={since}&per_page=10";
-            var response = await client.GetAsync(commitsUrl);
+            // Get all commits for the specific repository within the time period
+            var allCommits = await _gitHubCommitService.FetchAllCommitsForRepositoryAsync(client, repositoryName, since);
             
-            if (response.IsSuccessStatusCode)
+            if (allCommits?.Any() == true)
             {
-                var commits = await response.Content.ReadFromJsonAsync<List<GitHubCommit>>();
-                if (commits?.Any() == true)
-                {
-                    return commits
-                        .Where(c => c.Commit?.Message != null)
-                        .Select(c => c.Commit?.Message?.Split('\n')[0] ?? string.Empty) // Get first line of commit message
-                        .Where(msg => !string.IsNullOrWhiteSpace(msg))
-                        .Take(5) // Limit to 5 most recent
-                        .ToList();
-                }
+                return allCommits
+                    .Where(c => c.Commit?.Message != null)
+                    .Select(c => c.Commit?.Message?.Split('\n')[0] ?? string.Empty) // Get first line of commit message
+                    .Where(msg => !string.IsNullOrWhiteSpace(msg))
+                    .Take(5) // Limit to 5 most recent for summary
+                    .ToList();
             }
         }
         catch (Exception ex)
@@ -270,6 +268,7 @@ Based on these commits, describe what I've been building and fixing. Be specific
         
         return null;
     }
+
 }
 
 public class OllamaResponse
