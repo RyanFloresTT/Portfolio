@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, Signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { PortfolioService } from '../../services/portfolio.service';
@@ -12,20 +12,22 @@ import { Project } from '../../models/project.model';
   templateUrl: './projects.component.html'
 })
 export class ProjectsComponent implements OnInit {
-  projects: any;
+  projects: Signal<readonly Project[]>;
   expandedProject: string | null = null;
 
   constructor(
     public portfolioService: PortfolioService,
     private projectsService: ProjectsService,
     private router: Router
-  ) {this.projects = this.projectsService.getProjects();}
+  ) {
+    this.projects = this.projectsService.getProjects();
+  }
 
   ngOnInit() {
     this.portfolioService.loadCommitData();
   }
 
-  toggleExpanded(projectId: string) {
+  toggleExpanded(projectId: string): void {
     this.expandedProject = this.expandedProject === projectId ? null : projectId;
   }
 
@@ -33,7 +35,7 @@ export class ProjectsComponent implements OnInit {
     return this.projectsService.getFeaturedProjects();
   }
 
-  getTopRepositories() {
+  getTopRepositories(): any[] {
     return [...this.portfolioService.commitData()]
       .sort((a, b) => b.commitCount - a.commitCount)
       .slice(0, 8);
@@ -50,7 +52,7 @@ export class ProjectsComponent implements OnInit {
     return '#60a5fa'; // light blue
   }
 
-  getStatusClass(status: string): string {
+  getStatusClass(status: Project['status']): string {
     switch (status) {
       case 'completed':
         return 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200';
@@ -58,6 +60,8 @@ export class ProjectsComponent implements OnInit {
         return 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200';
       case 'planned':
         return 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200';
+      case 'archived':
+        return 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200';
       default:
         return 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200';
     }

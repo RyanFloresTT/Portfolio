@@ -1,0 +1,17 @@
+{
+  "files.associations": {
+    "*.component.html": "html"
+  },
+  "emmet.includeLanguages": {
+    "html": "html"
+  },
+  "html.suggest.angular1": false,
+  "html.suggest.ionic": false,
+  "typescript.preferences.includePackageJsonAutoImports": "on",
+  "angular.enable-strict-mode-prompt": false,
+  "angular.suggest.includeCompletionsWithSnippetText": true,
+  "angular.suggest.includeAutomaticOptionalChainCompletions": true,
+  "angular.experimental-ivy": true,
+  "typescript.suggest.autoImports": true,
+  "typescript.updateImportsOnFileMove.enabled": "always"
+}

@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, Signal } from '@angular/core';
 import { Project, PROJECT_CATEGORIES } from '../models/project.model';
 
 @Injectable({
@@ -13,7 +13,7 @@ export class ProjectsService {
       longDescription: 'This portfolio represents a comprehensive showcase of modern web development practices, featuring real-time data visualization, AI integration, and containerized deployment. The application demonstrates full-stack development skills with a focus on performance, user experience, and maintainable architecture.',
       technologies: ['Angular', '.NET 8', 'SignalR', 'Redis', 'Docker', 'Kubernetes', 'Ollama', 'TypeScript', 'Tailwind CSS'],
       status: 'completed',
-      githubUrl: 'https://github.com/ryanflorestt/PortfolioMakeover',
+      githubUrl: 'https://github.com/ryanflorestt/Portfolio',
       liveUrl: 'http://localhost:30082/',
       featured: true,
       startDate: new Date('2024-01-01'),
@@ -335,7 +335,7 @@ export class SignalRService {
 
   constructor() {}
 
-  getProjects() {
+  getProjects(): Signal<readonly Project[]> {
     return this.projects.asReadonly();
   }
 
