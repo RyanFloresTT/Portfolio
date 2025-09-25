@@ -117,7 +117,7 @@ public class CommitAnalysisService
                 var parts = c.Split(':', 2);
                 if (parts.Length == 2)
                 {
-                    return $"**{parts[0]}**: {parts[1]}";
+                    return $"{parts[0]}: {parts[1]}";
                 }
                 return c;
             }));
@@ -294,7 +294,7 @@ public class CommitAnalysisService
             var parts = detail.Split(':', 2);
             if (parts.Length == 2)
             {
-                summary += $"**{parts[0]}**: {parts[1]}\n\n";
+                summary += $"{parts[0]}: {parts[1]}\n\n";
             }
         }
         
