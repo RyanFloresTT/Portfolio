@@ -1,8 +1,7 @@
-using System.Text.Json;
 using API.Hubs;
-using API.Models;
+using Portfolio.Shared.Models;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.DependencyInjection;
+using  Portfolio.Shared.Services;
 
 namespace API.Services;
 

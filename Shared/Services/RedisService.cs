@@ -1,17 +1,21 @@
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 using System.Text.Json;
 
-namespace API.Services;
+namespace Portfolio.Shared.Services;
 
 public class RedisService
 {
     private readonly IDatabase _database;
     private readonly ILogger<RedisService> _logger;
 
-    public RedisService(IConnectionMultiplexer redis, ILogger<RedisService> logger)
+    public RedisService(IConfiguration configuration, ILogger<RedisService> logger)
     {
-        _database = redis.GetDatabase();
         _logger = logger;
+        var connectionString = configuration.GetConnectionString("Redis") ?? "localhost:6379";
+        var redis = ConnectionMultiplexer.Connect(connectionString);
+        _database = redis.GetDatabase();
     }
 
     public async Task<T?> GetAsync<T>(string key)
@@ -19,7 +23,8 @@ public class RedisService
         try
         {
             var value = await _database.StringGetAsync(key);
-            if (!value.HasValue) return default;
+            if (!value.HasValue)
+                return default;
 
             return JsonSerializer.Deserialize<T>(value!);
         }
@@ -52,20 +57,6 @@ public class RedisService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting key from Redis: {Key}", key);
-        }
-    }
-
-    public async Task DeletePatternAsync(string pattern)
-    {
-        try
-        {
-            var server = _database.Multiplexer.GetServer(_database.Multiplexer.GetEndPoints().First());
-            var keys = server.Keys(pattern: pattern);
-            await _database.KeyDeleteAsync(keys.ToArray());
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error deleting pattern from Redis: {Pattern}", pattern);
         }
     }
 }

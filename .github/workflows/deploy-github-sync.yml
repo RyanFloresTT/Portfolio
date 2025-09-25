@@ -1,0 +1,118 @@
+name: Deploy GitHub Sync Background Worker
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'BackgroundWorkers/**'
+      - 'API/**'
+      - '.github/workflows/deploy-github-sync.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'BackgroundWorkers/**'
+      - 'API/**'
+      - '.github/workflows/deploy-github-sync.yml'
+
+env:
+  REGISTRY: registry.digitalocean.com
+  REGISTRY_NAME: rfportfoliocr
+  GITHUB_SYNC_IMAGE: github-sync
+
+jobs:
+  build-and-push-github-sync:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Digital Ocean Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: doctl
+        password: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+    - name: Extract metadata for GitHub Sync
+      id: meta-github-sync
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.REGISTRY_NAME }}/${{ env.GITHUB_SYNC_IMAGE }}
+        tags: |
+          type=ref,event=branch
+          type=sha,prefix=main-
+          type=raw,value=latest,enable={{is_default_branch}}
+
+    - name: Build and push GitHub Sync image
+      id: build-github-sync
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./BackgroundWorkers/GitHubSync/Dockerfile
+        push: true
+        tags: ${{ steps.meta-github-sync.outputs.tags }}
+        labels: ${{ steps.meta-github-sync.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Output GitHub Sync image details
+      run: |
+        echo "GitHub Sync Image: ${{ steps.meta-github-sync.outputs.tags }}"
+
+  deploy-github-sync-to-k8s:
+    needs: build-and-push-github-sync
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'latest'
+
+    - name: Install doctl
+      uses: digitalocean/action-doctl@v2
+      with:
+        token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+    - name: Save Digital Ocean kubeconfig
+      run: doctl kubernetes cluster kubeconfig save ${{ secrets.DIGITALOCEAN_CLUSTER_NAME }}
+
+    - name: Create GitHub secrets if not exists
+      run: |
+        # Check if secret exists, if not create it
+        if ! kubectl get secret github-secrets -n portfolio >/dev/null 2>&1; then
+          echo "Creating GitHub secrets..."
+          kubectl create secret generic github-secrets \
+            --from-literal=token="${{ secrets.GH_TOKEN }}" \
+            --namespace=portfolio
+        else
+          echo "GitHub secrets already exist, updating token..."
+          kubectl create secret generic github-secrets \
+            --from-literal=token="${{ secrets.GH_TOKEN }}" \
+            --namespace=portfolio \
+            --dry-run=client -o yaml | kubectl apply -f -
+        fi
+
+    - name: Deploy GitHub Sync CronJob
+      run: |
+        # Apply the CronJob manifest
+        kubectl apply -f k8s/github-sync-cronjob.yaml
+        
+        # Check CronJob status
+        kubectl get cronjobs -n portfolio
+
+    - name: Verify GitHub Sync deployment
+      run: |
+        echo "GitHub Sync CronJob Status:"
+        kubectl get cronjobs -n portfolio
+        echo ""
+        echo "Recent Jobs:"
+        kubectl get jobs -n portfolio --sort-by=.metadata.creationTimestamp | tail -5

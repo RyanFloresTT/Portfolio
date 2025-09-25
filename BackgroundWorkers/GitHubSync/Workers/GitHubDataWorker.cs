@@ -1,63 +1,35 @@
-using System.Net;
-using API.Models;
-using API.Data;
-using API.Hubs;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.SignalR;
+using GitHubSync.Services;
+using Portfolio.Shared.Models;
+using Portfolio.Shared.Services;
+using System.Net.Http.Json;
 
-namespace API.Services;
+namespace GitHubSync.Workers;
 
-public class GitHubDataService : BackgroundService
+public class GitHubDataWorker
 {
-    private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger<GitHubDataService> _logger;
-    private readonly IConfiguration _configuration;
-    private readonly IHubContext<PortfolioHub> _hubContext;
+    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly ILogger<GitHubDataWorker> _logger;
     private readonly RedisService _redisService;
-    private readonly CommitAnalysisService _commitAnalysisService;
+    private readonly SignalRService _signalRService;
     private readonly GitHubCommitService _gitHubCommitService;
 
-    public GitHubDataService(
-        IServiceProvider serviceProvider,
-        ILogger<GitHubDataService> logger,
-        IConfiguration configuration,
-        IHubContext<PortfolioHub> hubContext,
+    public GitHubDataWorker(
+        IHttpClientFactory httpClientFactory,
+        ILogger<GitHubDataWorker> logger,
         RedisService redisService,
-        CommitAnalysisService commitAnalysisService,
+        SignalRService signalRService,
         GitHubCommitService gitHubCommitService)
     {
-        _serviceProvider = serviceProvider;
+        _httpClientFactory = httpClientFactory;
         _logger = logger;
-        _configuration = configuration;
-        _hubContext = hubContext;
         _redisService = redisService;
-        _commitAnalysisService = commitAnalysisService;
+        _signalRService = signalRService;
         _gitHubCommitService = gitHubCommitService;
-    }
-
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            try
-            {
-                await FetchAndStoreGitHubData();
-                await Task.Delay(TimeSpan.FromHours(1), stoppingToken); // Run every hour
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while fetching GitHub data");
-                await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken); // Retry in 5 minutes on error
-            }
-        }
     }
 
     public async Task FetchAndStoreGitHubData()
     {
-        using var scope = _serviceProvider.CreateScope();
-        var httpClientFactory = scope.ServiceProvider.GetRequiredService<IHttpClientFactory>();
-
-        var client = httpClientFactory.CreateClient("GitHub");
+        var client = _httpClientFactory.CreateClient("GitHub");
         var response = await client.GetAsync("https://api.github.com/users/ryanflorestt/repos");
         response.EnsureSuccessStatusCode();
         
@@ -73,13 +45,13 @@ public class GitHubDataService : BackgroundService
             try
             {
                 var since = periodStart.ToString("o");
-                var allCommits = await _gitHubCommitService.FetchAllCommitsForRepositoryAsync(client, repo, since);
+                var allCommits = await _gitHubCommitService.FetchAllCommitsForRepositoryAsync(client, repo.Name ?? string.Empty, since);
                 
                 if (allCommits?.Count > 0)
                 {
                     commitDataList.Add(new CommitData
                     {
-                        Id = repo.Name?.GetHashCode() ?? 0, // Generate stable unique ID based on repo name
+                        Id = repo.Name?.GetHashCode() ?? 0,
                         RepositoryName = repo.Name ?? string.Empty,
                         RepositoryUrl = repo.HtmlUrl ?? string.Empty,
                         CommitCount = allCommits.Count,
@@ -104,13 +76,12 @@ public class GitHubDataService : BackgroundService
             await _redisService.SetAsync("github:commits", commitDataList, TimeSpan.FromHours(2));
             
             // Invalidate AI summary cache to trigger new analysis
-            await _commitAnalysisService.InvalidateCacheAsync();
+            await _redisService.DeleteAsync("ai:summary");
 
             // Notify clients via SignalR
-            await _hubContext.Clients.All.SendAsync("CommitDataUpdated", commitDataList);
+            await _signalRService.NotifyCommitDataUpdated(commitDataList);
             
             _logger.LogInformation("Updated commit data for {Count} repositories", commitDataList.Count);
         }
     }
-
 }

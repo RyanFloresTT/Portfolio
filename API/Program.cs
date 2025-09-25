@@ -1,6 +1,7 @@
-using API.Models;
-using API.Services;
 using API.Hubs;
+using API.Services;
+using Portfolio.Shared.Models;
+using Portfolio.Shared.Services;
 using StackExchange.Redis;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -19,8 +20,12 @@ builder.Services.AddStackExchangeRedisCache(options =>
 builder.Services.AddSingleton<IConnectionMultiplexer>(provider =>
     ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379"));
 
+// Add HTTP clients
+builder.Services.AddHttpClient();
+
 // Add custom services
 builder.Services.AddSingleton<RedisService>();
+builder.Services.AddSingleton<GitHubCommitService>();
 builder.Services.AddSingleton<CommitAnalysisService>();
 
 builder.Services.AddSignalR();
@@ -31,24 +36,6 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials()));
-
-builder.Services.AddHostedService<GitHubDataService>();
-builder.Services.AddSingleton<GitHubDataService>();
-builder.Services.AddSingleton<GitHubCommitService>();
-
-builder.Services.AddHttpClient("GitHub", client => {
-    client.DefaultRequestHeaders.UserAgent.ParseAdd("rryanflorres portfolio API");
-    
-    // Read GitHub token from environment variable first, then fallback to config
-    var githubToken = Environment.GetEnvironmentVariable("GH_TOKEN") 
-                     ?? builder.Configuration["GitHub:Token"];
-    
-    if (!string.IsNullOrEmpty(githubToken))
-    {
-        client.DefaultRequestHeaders.Authorization =
-            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", githubToken);
-    }
-});
 
 WebApplication app = builder.Build();
 
@@ -95,17 +82,6 @@ app.MapGet("/health/ollama", async (IHttpClientFactory httpClientFactory, IConfi
     }
 });
 
-app.MapPost("/trigger-github-sync", async (GitHubDataService githubService) => {
-    try
-    {
-        await githubService.FetchAndStoreGitHubData();
-        return Results.Ok(new { message = "GitHub sync triggered successfully" });
-    }
-    catch (Exception ex)
-    {
-        return Results.Problem($"Error triggering sync: {ex.Message}");
-    }
-});
 
 app.MapPost("/regenerate-summary", async (CommitAnalysisService commitAnalysisService) => {
     try
