@@ -45,11 +45,11 @@ export class ProjectsComponent implements OnInit {
     const maxCommits = Math.max(...this.portfolioService.commitData().map(r => r.commitCount));
     const intensity = commitCount / maxCommits;
     
-    if (intensity === 0) return '#374151'; // dark gray
-    if (intensity <= 0.2) return '#1e3a8a'; // dark blue
-    if (intensity <= 0.4) return '#2563eb'; // blue
-    if (intensity <= 0.6) return '#3b82f6'; // lighter blue
-    return '#60a5fa'; // light blue
+    if (intensity === 0) return '#374151'; // gray-700 (dark mode)
+    if (intensity <= 0.2) return '#1e3a8a'; // blue-900 (dark mode)
+    if (intensity <= 0.4) return '#1e40af'; // blue-800 (dark mode)
+    if (intensity <= 0.6) return '#1d4ed8'; // blue-700 (dark mode)
+    return '#2563eb'; // blue-600 (dark mode)
   }
 
   getStatusClass(status: Project['status']): string {
