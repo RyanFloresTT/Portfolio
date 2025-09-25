@@ -1,0 +1,38 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: github-sync
+  namespace: portfolio
+spec:
+  schedule: "0 * * * *"  # Run every hour at minute 0
+  concurrencyPolicy: Forbid  # Don't run if previous job is still running
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: github-sync
+            image: registry.digitalocean.com/rfportfoliocr/github-sync:latest
+            imagePullPolicy: Always
+            env:
+            - name: ConnectionStrings__Redis
+              value: "redis-service:6379"
+            - name: SignalR__HubUrl
+              value: "https://api.trustytea.me/portfolioHub"
+            - name: GitHub__Token
+              valueFrom:
+                secretKeyRef:
+                  name: github-secrets
+                  key: token
+            resources:
+              requests:
+                memory: "128Mi"
+                cpu: "100m"
+              limits:
+                memory: "256Mi"
+                cpu: "200m"
+            restartPolicy: OnFailure
+          restartPolicy: OnFailure
+      backoffLimit: 3
