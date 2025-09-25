@@ -34,7 +34,7 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddHostedService<GitHubDataService>();
 builder.Services.AddSingleton<GitHubDataService>();
-builder.Services.AddScoped<GitHubCommitService>();
+builder.Services.AddSingleton<GitHubCommitService>();
 
 builder.Services.AddHttpClient("GitHub", client => {
     client.DefaultRequestHeaders.UserAgent.ParseAdd("rryanflorres portfolio API");
@@ -104,6 +104,18 @@ app.MapPost("/trigger-github-sync", async (GitHubDataService githubService) => {
     catch (Exception ex)
     {
         return Results.Problem($"Error triggering sync: {ex.Message}");
+    }
+});
+
+app.MapPost("/regenerate-summary", async (CommitAnalysisService commitAnalysisService) => {
+    try
+    {
+        await commitAnalysisService.InvalidateCacheAsync();
+        return Results.Ok(new { message = "Personal summary regenerated successfully" });
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem($"Error regenerating summary: {ex.Message}");
     }
 });
 
