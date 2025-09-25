@@ -1,0 +1,323 @@
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+  <!-- Back Navigation -->
+  <div class="max-w-6xl mx-auto px-6 py-4">
+    <button (click)="goBack()" 
+            class="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors duration-200">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+      Back to Projects
+    </button>
+  </div>
+
+  @if (project(); as currentProject) {
+    <div class="max-w-6xl mx-auto px-6 pb-12">
+      <!-- Project Header -->
+      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-8 mb-8 shadow-sm">
+        <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+          <div class="flex-1">
+            <div class="flex items-center gap-3 mb-4">
+              <h1 class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-gray-200">{{ currentProject.name }}</h1>
+              <span class="px-3 py-1 text-sm font-medium rounded-full" [class]="getStatusClass(currentProject.status)">
+                {{ currentProject.status | titlecase }}
+              </span>
+            </div>
+            
+            <p class="text-lg text-gray-600 dark:text-gray-400 mb-6">{{ currentProject.description }}</p>
+            
+            <div class="flex flex-wrap gap-2 mb-6">
+              @for (tech of currentProject.technologies; track tech) {
+                <span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-sm font-medium rounded-lg">
+                  {{ tech }}
+                </span>
+              }
+            </div>
+            
+            <div class="flex flex-wrap gap-3">
+              @if (currentProject.githubUrl) {
+                <a [href]="currentProject.githubUrl" target="_blank" rel="noopener noreferrer"
+                   class="inline-flex items-center gap-2 px-4 py-2 bg-gray-800 dark:bg-gray-600 text-white rounded-lg font-medium hover:bg-gray-700 dark:hover:bg-gray-500 transition-colors duration-200">
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                  </svg>
+                  View Code
+                </a>
+              }
+              @if (currentProject.liveUrl) {
+                <a [href]="currentProject.liveUrl" target="_blank" rel="noopener noreferrer"
+                   class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-700 dark:hover:bg-blue-400 transition-colors duration-200">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                  </svg>
+                  Live Demo
+                </a>
+              }
+              @if (currentProject.blogPostUrl) {
+                <a [href]="currentProject.blogPostUrl" target="_blank" rel="noopener noreferrer"
+                   class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 dark:bg-green-500 text-white rounded-lg font-medium hover:bg-green-700 dark:hover:bg-green-400 transition-colors duration-200">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path>
+                  </svg>
+                  Read Blog Post
+                </a>
+              }
+            </div>
+          </div>
+          
+          @if (currentProject.imageUrl) {
+            <div class="lg:w-80">
+              <img [src]="currentProject.imageUrl" [alt]="currentProject.name" 
+                   class="w-full h-48 lg:h-64 object-cover rounded-lg shadow-md">
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Detailed Content -->
+      @if (currentProject.detailedContent; as content) {
+        <div class="space-y-8">
+          <!-- Overview -->
+          <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-4">Overview</h2>
+            <p class="text-gray-600 dark:text-gray-400 leading-relaxed">{{ content.overview }}</p>
+          </div>
+
+          <!-- Problem Statement & Solution -->
+          @if (content.problemStatement || content.solution) {
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              @if (content.problemStatement) {
+                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+                  <h3 class="text-xl font-bold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
+                    <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                    </svg>
+                    Problem Statement
+                  </h3>
+                  <p class="text-gray-600 dark:text-gray-400 leading-relaxed">{{ content.problemStatement }}</p>
+                </div>
+              }
+              
+              @if (content.solution) {
+                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+                  <h3 class="text-xl font-bold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
+                    <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Solution
+                  </h3>
+                  <p class="text-gray-600 dark:text-gray-400 leading-relaxed">{{ content.solution }}</p>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Key Features -->
+          @if (content.keyFeatures && content.keyFeatures.length > 0) {
+            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+              <h3 class="text-xl font-bold text-gray-800 dark:text-gray-200 mb-4">Key Features</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                @for (feature of content.keyFeatures; track feature) {
+                  <div class="flex items-start gap-3">
+                    <svg class="w-5 h-5 text-blue-500 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span class="text-gray-600 dark:text-gray-400">{{ feature }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Architecture -->
+          @if (content.architecture) {
+            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+              <h3 class="text-xl font-bold text-gray-800 dark:text-gray-200 mb-4">Architecture</h3>
+              <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
+                <pre class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{ content.architecture }}</pre>
+              </div>
+            </div>
+          }
+
+          <!-- Technical Decisions -->
+          @if (content.technicalDecisions && content.technicalDecisions.length > 0) {
+            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+              <h3 class="text-xl font-bold text-gray-800 dark:text-gray-200 mb-4">Technical Decisions</h3>
+              <div class="space-y-6">
+                @for (decision of content.technicalDecisions; track decision.decision) {
+                  <div class="border-l-4 border-blue-500 pl-4">
+                    <h4 class="font-semibold text-gray-800 dark:text-gray-200 mb-2">{{ decision.decision }}</h4>
+                    <p class="text-gray-600 dark:text-gray-400 mb-2">{{ decision.reasoning }}</p>
+                    @if (decision.alternatives && decision.alternatives.length > 0) {
+                      <div class="mb-2">
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Alternatives considered:</span>
+                        <ul class="text-sm text-gray-600 dark:text-gray-400 ml-4 mt-1">
+                          @for (alt of decision.alternatives; track alt) {
+                            <li class="list-disc">{{ alt }}</li>
+                          }
+                        </ul>
+                      </div>
+                    }
+                    @if (decision.impact) {
+                      <p class="text-sm text-gray-600 dark:text-gray-400">
+                        <span class="font-medium">Impact:</span> {{ decision.impact }}
+                      </p>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Metrics -->
+          @if (content.metrics && content.metrics.length > 0) {
+            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+              <h3 class="text-xl font-bold text-gray-800 dark:text-gray-200 mb-4">Project Metrics</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                @for (metric of content.metrics; track metric.name) {
+                  <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
+                    <h4 class="font-semibold text-gray-800 dark:text-gray-200 mb-1">{{ metric.name }}</h4>
+                    <p class="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-2">{{ metric.value }}</p>
+                    @if (metric.description) {
+                      <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">{{ metric.description }}</p>
+                    }
+                    @if (metric.improvement) {
+                      <p class="text-sm text-green-600 dark:text-green-400 font-medium">{{ metric.improvement }}</p>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Code Snippets -->
+          @if (content.codeSnippets && content.codeSnippets.length > 0) {
+            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+              <h3 class="text-xl font-bold text-gray-800 dark:text-gray-200 mb-4">Code Highlights</h3>
+              <div class="space-y-6">
+                @for (snippet of content.codeSnippets; track snippet.title) {
+                  <div>
+                    <h4 class="font-semibold text-gray-800 dark:text-gray-200 mb-2">{{ snippet.title }}</h4>
+                    @if (snippet.description) {
+                      <p class="text-gray-600 dark:text-gray-400 mb-3">{{ snippet.description }}</p>
+                    }
+                    <div class="bg-gray-900 rounded-lg p-4 overflow-x-auto">
+                      <pre class="text-sm text-gray-100"><code class="language-{{ snippet.language }}">{{ snippet.code }}</code></pre>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Screenshots -->
+          @if (content.additionalScreenshots && content.additionalScreenshots.length > 0) {
+            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+              <h3 class="text-xl font-bold text-gray-800 dark:text-gray-200 mb-4">Screenshots</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                @for (screenshot of content.additionalScreenshots; track screenshot) {
+                  <div class="rounded-lg overflow-hidden shadow-md">
+                    <img [src]="screenshot" [alt]="currentProject.name + ' screenshot'" 
+                         class="w-full h-auto hover:scale-105 transition-transform duration-200 cursor-pointer"
+                         (click)="openImageModal(screenshot)">
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Lessons Learned -->
+          @if (content.lessonsLearned && content.lessonsLearned.length > 0) {
+            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+              <h3 class="text-xl font-bold text-gray-800 dark:text-gray-200 mb-4">Lessons Learned</h3>
+              <ul class="space-y-3">
+                @for (lesson of content.lessonsLearned; track lesson) {
+                  <li class="flex items-start gap-3">
+                    <svg class="w-5 h-5 text-yellow-500 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                    </svg>
+                    <span class="text-gray-600 dark:text-gray-400">{{ lesson }}</span>
+                  </li>
+                }
+              </ul>
+            </div>
+          }
+
+          <!-- Future Improvements -->
+          @if (content.futureImprovements && content.futureImprovements.length > 0) {
+            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+              <h3 class="text-xl font-bold text-gray-800 dark:text-gray-200 mb-4">Future Improvements</h3>
+              <ul class="space-y-3">
+                @for (improvement of content.futureImprovements; track improvement) {
+                  <li class="flex items-start gap-3">
+                    <svg class="w-5 h-5 text-purple-500 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                    <span class="text-gray-600 dark:text-gray-400">{{ improvement }}</span>
+                  </li>
+                }
+              </ul>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Challenges & Achievements (from original project) -->
+      @if (currentProject.challenges && currentProject.challenges.length > 0 || currentProject.achievements && currentProject.achievements.length > 0) {
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+          @if (currentProject.challenges && currentProject.challenges.length > 0) {
+            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+              <h3 class="text-xl font-bold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
+                <svg class="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                </svg>
+                Challenges
+              </h3>
+              <ul class="space-y-3">
+                @for (challenge of currentProject.challenges; track challenge) {
+                  <li class="flex items-start gap-3">
+                    <span class="text-orange-500 mt-1">•</span>
+                    <span class="text-gray-600 dark:text-gray-400">{{ challenge }}</span>
+                  </li>
+                }
+              </ul>
+            </div>
+          }
+          
+          @if (currentProject.achievements && currentProject.achievements.length > 0) {
+            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+              <h3 class="text-xl font-bold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
+                <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Achievements
+              </h3>
+              <ul class="space-y-3">
+                @for (achievement of currentProject.achievements; track achievement) {
+                  <li class="flex items-start gap-3">
+                    <span class="text-green-500 mt-1">•</span>
+                    <span class="text-gray-600 dark:text-gray-400">{{ achievement }}</span>
+                  </li>
+                }
+              </ul>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  } @else {
+    <!-- Project Not Found -->
+    <div class="max-w-6xl mx-auto px-6 py-12">
+      <div class="text-center">
+        <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-4">Project Not Found</h1>
+        <p class="text-gray-600 dark:text-gray-400 mb-6">The project you're looking for doesn't exist or has been removed.</p>
+        <button (click)="goBack()" 
+                class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+          Back to Projects
+        </button>
+      </div>
+    </div>
+  }
+</div>
