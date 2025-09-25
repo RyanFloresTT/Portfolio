@@ -6,7 +6,7 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 COPY ["BackgroundWorkers/GitHubSync/GitHubSync.csproj", "BackgroundWorkers/GitHubSync/"]
-COPY ["API/API.csproj", "API/"]
+COPY ["Shared/Portfolio.Shared.csproj", "Shared/"]
 RUN dotnet restore "BackgroundWorkers/GitHubSync/GitHubSync.csproj"
 COPY . .
 WORKDIR "/src/BackgroundWorkers/GitHubSync"
