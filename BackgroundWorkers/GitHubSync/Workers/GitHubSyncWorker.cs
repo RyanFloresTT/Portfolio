@@ -1,6 +1,4 @@
 using GitHubSync.Services;
-using API.Models;
-using API.Services;
 
 namespace GitHubSync.Workers;
 
