@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: registry.digitalocean.com/rfportfoliocr/portfolio-frontend:latest
+        image: registry.digitalocean.com/rfportfoliocr/portfolio-frontend:main
         imagePullPolicy: Always
         ports:
         - containerPort: 80
