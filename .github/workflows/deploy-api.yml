@@ -1,19 +1,24 @@
-name: Deploy to Digital Ocean Container Registry
+name: Deploy API to Digital Ocean
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
+    paths:
+      - 'API/**'
+      - '.github/workflows/deploy-api.yml'
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
+    paths:
+      - 'API/**'
+      - '.github/workflows/deploy-api.yml'
 
 env:
   REGISTRY: registry.digitalocean.com
   REGISTRY_NAME: rfportfoliocr
   API_IMAGE: portfolio-api
-  FRONTEND_IMAGE: portfolio-frontend
 
 jobs:
-  build-and-push:
+  build-and-push-api:
     runs-on: ubuntu-latest
     
     steps:
@@ -41,17 +46,6 @@ jobs:
           type=sha,prefix={{branch}}-
           type=raw,value=latest,enable={{is_default_branch}}
 
-    - name: Extract metadata for Frontend
-      id: meta-frontend
-      uses: docker/metadata-action@v5
-      with:
-        images: ${{ env.REGISTRY }}/${{ env.REGISTRY_NAME }}/${{ env.FRONTEND_IMAGE }}
-        tags: |
-          type=ref,event=branch
-          type=ref,event=pr
-          type=sha,prefix={{branch}}-
-          type=raw,value=latest,enable={{is_default_branch}}
-
     - name: Build and push API image
       uses: docker/build-push-action@v5
       with:
@@ -63,26 +57,14 @@ jobs:
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
-    - name: Build and push Frontend image
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        file: ./UI/Dockerfile
-        push: true
-        tags: ${{ steps.meta-frontend.outputs.tags }}
-        labels: ${{ steps.meta-frontend.outputs.labels }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-
-    - name: Output image details
+    - name: Output API image details
       run: |
         echo "API Image: ${{ steps.meta-api.outputs.tags }}"
-        echo "Frontend Image: ${{ steps.meta-frontend.outputs.tags }}"
 
-  deploy-to-k8s:
-    needs: build-and-push
+  deploy-api-to-k8s:
+    needs: build-and-push-api
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     
     steps:
     - name: Checkout code
@@ -101,21 +83,15 @@ jobs:
     - name: Save Digital Ocean kubeconfig
       run: doctl kubernetes cluster kubeconfig save ${{ secrets.DIGITALOCEAN_CLUSTER_NAME }}
 
-    - name: Update Kubernetes deployments
+    - name: Update API deployment
       run: |
         # Update API deployment
         kubectl set image deployment/portfolio-api api=${{ env.REGISTRY }}/${{ env.REGISTRY_NAME }}/portfolio-api:latest -n portfolio
         
-        # Update Frontend deployment
-        kubectl set image deployment/portfolio-frontend frontend=${{ env.REGISTRY }}/${{ env.REGISTRY_NAME }}/portfolio-frontend:latest -n portfolio
-        
         # Wait for rollout to complete
         kubectl rollout status deployment/portfolio-api -n portfolio --timeout=300s
-        kubectl rollout status deployment/portfolio-frontend -n portfolio --timeout=300s
 
-    - name: Verify deployments
+    - name: Verify API deployment
       run: |
         echo "API Deployment Status:"
         kubectl get deployment portfolio-api -n portfolio
-        echo "Frontend Deployment Status:"
-        kubectl get deployment portfolio-frontend -n portfolio
