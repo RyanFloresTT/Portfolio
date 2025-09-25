@@ -33,6 +33,5 @@ spec:
               limits:
                 memory: "256Mi"
                 cpu: "200m"
-            restartPolicy: OnFailure
           restartPolicy: OnFailure
       backoffLimit: 3
