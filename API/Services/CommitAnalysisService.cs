@@ -108,10 +108,9 @@ public class CommitAnalysisService(
     }
 
     async Task<string> GenerateAISummary() {
-        string ollamaUrl = configuration["Ollama:BaseURl"] ?? "http://127.0.0.1:11434";
-        HttpClient client = httpClientFactory.CreateClient();
-        client.Timeout = TimeSpan.FromSeconds(30); // Shorter timeout
+        string ollamaUrl = configuration["Ollama:BaseUrl"] ?? "http://127.0.0.1:11434";
 
+        HttpClient client = httpClientFactory.CreateClient();
         var requestBody = new {
             stream = false,
             options = new {
