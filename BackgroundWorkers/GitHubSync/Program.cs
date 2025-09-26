@@ -18,11 +18,14 @@ builder.Services.AddHttpClient("GitHub", client =>
     }
 });
 
+// Add general HTTP client for API calls
+builder.Services.AddHttpClient();
+
 // Add Redis
 builder.Services.AddSingleton<RedisService>();
 
 // Add SignalR client
-builder.Services.AddSingleton<SignalRService>();
+builder.Services.AddSingleton<NotifyAPIService>();
 
 // Add GitHub services
 builder.Services.AddSingleton<GitHubCommitService>();

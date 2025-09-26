@@ -10,14 +10,14 @@ public class GitHubDataWorker
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<GitHubDataWorker> _logger;
     private readonly RedisService _redisService;
-    private readonly SignalRService _signalRService;
+    private readonly NotifyAPIService _signalRService;
     private readonly GitHubCommitService _gitHubCommitService;
 
     public GitHubDataWorker(
         IHttpClientFactory httpClientFactory,
         ILogger<GitHubDataWorker> logger,
         RedisService redisService,
-        SignalRService signalRService,
+        NotifyAPIService signalRService,
         GitHubCommitService gitHubCommitService)
     {
         _httpClientFactory = httpClientFactory;
