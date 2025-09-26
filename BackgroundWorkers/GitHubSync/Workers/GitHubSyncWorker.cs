@@ -5,7 +5,7 @@ namespace GitHubSync.Workers;
 public class GitHubSyncWorker(
     ILogger<GitHubSyncWorker> logger,
     GitHubDataWorker gitHubDataWorker,
-    NotifyApiService signalRService)
+    NotifyApiService notifyApiService)
     : BackgroundService {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken) {
         try {
@@ -26,7 +26,7 @@ public class GitHubSyncWorker(
 
     public override async Task StopAsync(CancellationToken cancellationToken) {
         logger.LogInformation("GitHub sync worker is stopping");
-        await signalRService.DisposeAsync();
+        await notifyApiService.DisposeAsync();
         await base.StopAsync(cancellationToken);
     }
 }

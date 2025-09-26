@@ -9,8 +9,9 @@ public class GitHubDataWorker(
     IHttpClientFactory httpClientFactory,
     ILogger<GitHubDataWorker> logger,
     RedisService redisService,
-    NotifyApiService signalRService,
-    GitHubCommitService gitHubCommitService) {
+    NotifyApiService notifyApiService,
+    GitHubCommitService gitHubCommitService,
+    IConfiguration configuration) {
     public async Task FetchAndStoreGitHubData() {
         HttpClient client = httpClientFactory.CreateClient("GitHub");
         HttpResponseMessage response = await client.GetAsync("https://api.github.com/users/ryanflorestt/repos");
@@ -52,9 +53,29 @@ public class GitHubDataWorker(
 
             await redisService.DeleteAsync("ai:summary");
 
-            await signalRService.NotifyCommitDataUpdated(commitDataList);
+            await notifyApiService.NotifyCommitDataUpdated(commitDataList);
+
+            await TriggerSummaryGeneration();
 
             logger.LogInformation("Updated commit data for {Count} repositories", commitDataList.Count);
+        }
+    }
+
+    private async Task TriggerSummaryGeneration() {
+        try {
+            string apiBaseUrl = configuration["API:BaseUrl"] ?? "http://portfolio-api-service";
+            HttpClient client = httpClientFactory.CreateClient();
+            
+            HttpResponseMessage response = await client.PostAsync($"{apiBaseUrl}/api/notify/generate-summary", null);
+            
+            if (response.IsSuccessStatusCode) {
+                logger.LogInformation("Successfully triggered personal summary generation");
+            } else {
+                logger.LogWarning("Failed to trigger summary generation: {StatusCode}", response.StatusCode);
+            }
+        }
+        catch (Exception ex) {
+            logger.LogError(ex, "Error triggering summary generation");
         }
     }
 }
