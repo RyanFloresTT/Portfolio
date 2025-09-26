@@ -97,4 +97,14 @@ app.MapPost("/regenerate-summary", async (CommitAnalysisService commitAnalysisSe
     }
 });
 
+app.MapPost("/api/notify/generate-summary", async (CommitAnalysisService commitAnalysisService) => {
+    try {
+        await commitAnalysisService.InvalidateCacheAsync();
+        return Results.Ok(new { message = "Personal summary generated and broadcasted successfully" });
+    }
+    catch (Exception ex) {
+        return Results.Problem($"Error generating summary: {ex.Message}");
+    }
+});
+
 app.Run();

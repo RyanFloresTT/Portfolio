@@ -20,7 +20,7 @@ spec:
             - name: ConnectionStrings__Redis
               value: "redis-service:6379"
             - name: API__BaseUrl
-              value: "https://api.trustytea.me"
+              value: "http://portfolio-api-service"
             - name: GitHub__Token
               valueFrom:
                 secretKeyRef:

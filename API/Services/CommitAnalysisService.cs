@@ -10,8 +10,7 @@ public class CommitAnalysisService(
     RedisService redisService,
     ILogger<CommitAnalysisService> logger,
     IConfiguration configuration,
-    IHubContext<PortfolioHub> hubContext,
-    GitHubCommitService gitHubCommitService) {
+    IHubContext<PortfolioHub> hubContext) {
     public async Task<string> GetPersonalSummaryAsync() {
         string? cachedSummary = await redisService.GetAsync<string>("ai:summary");
         if (!string.IsNullOrEmpty(cachedSummary)) return cachedSummary;
@@ -58,9 +57,8 @@ public class CommitAnalysisService(
             // Fetch actual commit messages for each repository
             foreach (CommitData repo in recentRepos)
                 try {
-                    var commits = await FetchRecentCommits(repo.RepositoryName);
-                    if (commits?.Any() == true)
-                        commitDetails.Add($"{repo.RepositoryName}: {string.Join(", ", commits.Take(3))}");
+                    var commits = await redisService.GetAsync<List<CommitData>>("github:commits");
+                    commitDetails.Add($"{repo.RepositoryName}: {string.Join(", ", (commits ?? []).Take(3))}");
                 }
                 catch (Exception ex) {
                     logger.LogWarning(ex, "Failed to fetch commits for {RepoName}", repo.RepositoryName);
@@ -161,31 +159,6 @@ public class CommitAnalysisService(
         }
 
         return summary.TrimEnd();
-    }
-
-    async Task<List<string>?> FetchRecentCommits(string repositoryName) {
-        try {
-            HttpClient client = httpClientFactory.CreateClient("GitHub");
-
-            DateTime periodStart = DateTime.UtcNow.AddDays(-90);
-            string since = periodStart.ToString("o");
-
-            // Get all commits for the specific repository within the time period
-            var allCommits = await gitHubCommitService.FetchAllCommitsForRepositoryAsync(client, repositoryName, since);
-
-            if (allCommits?.Any() == true)
-                return allCommits
-                    .Where(c => c.Commit?.Message != null)
-                    .Select(c => c.Commit?.Message?.Split('\n')[0] ?? string.Empty) // Get first line of commit message
-                    .Where(msg => !string.IsNullOrWhiteSpace(msg))
-                    .Take(5) // Limit to 5 most recent for summary
-                    .ToList();
-        }
-        catch (Exception ex) {
-            logger.LogWarning(ex, "Failed to fetch commits for repository {RepositoryName}", repositoryName);
-        }
-
-        return null;
     }
 }
 
