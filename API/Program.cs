@@ -44,8 +44,8 @@ app.UseCors();
 app.MapHub<PortfolioHub>("/portfolioHub");
 
 app.MapGet("/", async (RedisService redisService) => {
-    var commitData = await redisService.GetAsync<List<CommitData>>("github:commits");
-    return Results.Ok(commitData ?? new List<CommitData>());
+    var commitData = await redisService.GetAsync<List<RepoData>>("github:commits");
+    return Results.Ok(commitData ?? new List<RepoData>());
 });
 
 app.MapGet("/personal-summary", async (CommitAnalysisService commitAnalysisService) => {
@@ -54,7 +54,7 @@ app.MapGet("/personal-summary", async (CommitAnalysisService commitAnalysisServi
 });
 
 app.MapPost("/api/notify/commit-data-updated",
-    async (List<CommitData> commitData, IHubContext<PortfolioHub> hubContext) => {
+    async (List<RepoData> commitData, IHubContext<PortfolioHub> hubContext) => {
         await hubContext.Clients.All.SendAsync("CommitDataUpdated", commitData);
         return Results.Ok();
     });
@@ -89,7 +89,7 @@ app.MapGet("/health/ollama", async (IHttpClientFactory httpClientFactory, IConfi
 
 app.MapPost("/regenerate-summary", async (CommitAnalysisService commitAnalysisService) => {
     try {
-        await commitAnalysisService.InvalidateCacheAsync();
+        await commitAnalysisService.InvalidateSummaryCacheAsync();
         return Results.Ok(new { message = "Personal summary regenerated successfully" });
     }
     catch (Exception ex) {
@@ -99,7 +99,7 @@ app.MapPost("/regenerate-summary", async (CommitAnalysisService commitAnalysisSe
 
 app.MapPost("/api/notify/generate-summary", async (CommitAnalysisService commitAnalysisService) => {
     try {
-        await commitAnalysisService.InvalidateCacheAsync();
+        await commitAnalysisService.InvalidateSummaryCacheAsync();
         return Results.Ok(new { message = "Personal summary generated and broadcasted successfully" });
     }
     catch (Exception ex) {
