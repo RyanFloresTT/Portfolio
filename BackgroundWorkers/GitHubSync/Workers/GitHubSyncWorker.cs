@@ -18,6 +18,10 @@ public class GitHubSyncWorker(
         catch (Exception ex) {
             logger.LogError(ex, "Error occurred during GitHub data sync");
         }
+        finally {
+            logger.LogInformation("GitHub sync worker completed");
+            Environment.Exit(0);
+        }
     }
 
     public override async Task StopAsync(CancellationToken cancellationToken) {
