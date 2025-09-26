@@ -1,5 +1,6 @@
 using API.Hubs;
 using API.Services;
+using Microsoft.AspNetCore.SignalR;
 using Portfolio.Shared.Models;
 using Portfolio.Shared.Services;
 using StackExchange.Redis;
@@ -55,6 +56,16 @@ app.MapGet("/", async (RedisService redisService) => {
 app.MapGet("/personal-summary", async (CommitAnalysisService commitAnalysisService) => {
     var summary = await commitAnalysisService.GetPersonalSummaryAsync();
     return Results.Ok(new { summary });
+});
+
+app.MapPost("/api/notify/commit-data-updated", async (List<CommitData> commitData, IHubContext<PortfolioHub> hubContext) => {
+    await hubContext.Clients.All.SendAsync("CommitDataUpdated", commitData);
+    return Results.Ok();
+});
+
+app.MapPost("/api/notify/personal-summary-updated", async (string summary, IHubContext<PortfolioHub> hubContext) => {
+    await hubContext.Clients.All.SendAsync("PersonalSummaryUpdated", summary);
+    return Results.Ok();
 });
 
 

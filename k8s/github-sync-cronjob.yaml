@@ -19,8 +19,8 @@ spec:
             env:
             - name: ConnectionStrings__Redis
               value: "redis-service:6379"
-            - name: SignalR__HubUrl
-              value: "https://api.trustytea.me/portfolioHub"
+            - name: API__BaseUrl
+              value: "https://api.trustytea.me"
             - name: GitHub__Token
               valueFrom:
                 secretKeyRef:

@@ -6,12 +6,12 @@ public class GitHubSyncWorker : BackgroundService
 {
     private readonly ILogger<GitHubSyncWorker> _logger;
     private readonly GitHubDataWorker _gitHubDataWorker;
-    private readonly SignalRService _signalRService;
+    private readonly NotifyAPIService _signalRService;
 
     public GitHubSyncWorker(
         ILogger<GitHubSyncWorker> logger,
         GitHubDataWorker gitHubDataWorker,
-        SignalRService signalRService)
+        NotifyAPIService signalRService)
     {
         _logger = logger;
         _gitHubDataWorker = gitHubDataWorker;
@@ -19,15 +19,6 @@ public class GitHubSyncWorker : BackgroundService
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        // Start SignalR connection
-        await _signalRService.StartConnection();
-
-        // Run once and exit (CronJob handles scheduling)
-        await DoWork();
-    }
-
-    private async Task DoWork()
     {
         try
         {
