@@ -11,7 +11,7 @@ public class NotifyApiService(
     readonly string apiBaseUrl = configuration["API:BaseUrl"] ?? "https://api.trustytea.me";
 
 
-    public async Task NotifyCommitDataUpdated(List<CommitData> commitData) {
+    public async Task NotifyCommitDataUpdated(List<RepoData> commitData) {
         try {
             HttpResponseMessage response =
                 await httpClient.PostAsJsonAsync($"{apiBaseUrl}/api/notify/commit-data-updated", commitData);
@@ -22,20 +22,6 @@ public class NotifyApiService(
         }
         catch (Exception ex) {
             logger.LogError(ex, "Error notifying API of commit data update");
-        }
-    }
-
-    public async Task NotifyPersonalSummaryUpdated(string summary) {
-        try {
-            HttpResponseMessage? response =
-                await httpClient.PostAsJsonAsync($"{apiBaseUrl}/api/notify/personal-summary-updated", new { summary });
-            if (response.IsSuccessStatusCode)
-                logger.LogInformation("Notified API of personal summary update");
-            else
-                logger.LogWarning("Failed to notify API of personal summary update: {StatusCode}", response.StatusCode);
-        }
-        catch (Exception ex) {
-            logger.LogError(ex, "Error notifying API of personal summary update");
         }
     }
 

@@ -22,7 +22,7 @@ public class GitHubDataWorker(
 
         DateTime periodStart = DateTime.UtcNow.AddDays(-90);
         DateTime periodEnd = DateTime.UtcNow;
-        var commitDataList = new List<CommitData>();
+        List<RepoData> repoDataList = [];
 
         foreach (GitHubRepository repo in repositories)
             try {
@@ -32,7 +32,7 @@ public class GitHubDataWorker(
                         since);
 
                 if (allCommits?.Count > 0)
-                    commitDataList.Add(new CommitData {
+                    repoDataList.Add(new RepoData {
                         Id = repo.Name?.GetHashCode() ?? 0,
                         RepositoryName = repo.Name ?? string.Empty,
                         RepositoryUrl = repo.HtmlUrl ?? string.Empty,
@@ -46,33 +46,55 @@ public class GitHubDataWorker(
                 logger.LogWarning(ex, "Failed to fetch commits for repository {RepositoryName}", repo.Name);
             }
 
-        commitDataList.Sort((a, b) => b.LastUpdated.CompareTo(a.LastUpdated));
+        repoDataList.Sort((a, b) => b.LastUpdated.CompareTo(a.LastUpdated));
 
-        if (commitDataList.Count != 0) {
-            await redisService.SetAsync("github:commits", commitDataList, TimeSpan.FromHours(2));
+        if (repoDataList.Count != 0) {
+            await redisService.SetAsync("github:repos", repoDataList, TimeSpan.FromHours(2));
+
+            foreach (RepoData? repo in repoDataList.Take(3))
+                try {
+                    string since = periodStart.ToString("o");
+                    var commits =
+                        await gitHubCommitService.FetchAllCommitsForRepositoryAsync(client, repo.RepositoryName, since);
+
+                    if (commits?.Count > 0) {
+                        var commitMessages = commits
+                            .Where(c => !string.IsNullOrEmpty(c.Commit?.Message))
+                            .Select(c => c.Commit!.Message!.Trim())
+                            .Take(10)
+                            .ToList();
+
+                        await redisService.SetAsync($"github:commits:{repo.RepositoryName}", commitMessages,
+                            TimeSpan.FromHours(2));
+                        logger.LogInformation("Stored {Count} commit messages for {RepoName}", commitMessages.Count,
+                            repo.RepositoryName);
+                    }
+                }
+                catch (Exception ex) {
+                    logger.LogWarning(ex, "Failed to store commit messages for {RepoName}", repo.RepositoryName);
+                }
 
             await redisService.DeleteAsync("ai:summary");
 
-            await notifyApiService.NotifyCommitDataUpdated(commitDataList);
+            await notifyApiService.NotifyCommitDataUpdated(repoDataList);
 
             await TriggerSummaryGeneration();
 
-            logger.LogInformation("Updated commit data for {Count} repositories", commitDataList.Count);
+            logger.LogInformation("Updated commit data for {Count} repositories", repoDataList.Count);
         }
     }
 
-    private async Task TriggerSummaryGeneration() {
+    async Task TriggerSummaryGeneration() {
         try {
             string apiBaseUrl = configuration["API:BaseUrl"] ?? "http://portfolio-api-service";
             HttpClient client = httpClientFactory.CreateClient();
-            
+
             HttpResponseMessage response = await client.PostAsync($"{apiBaseUrl}/api/notify/generate-summary", null);
-            
-            if (response.IsSuccessStatusCode) {
+
+            if (response.IsSuccessStatusCode)
                 logger.LogInformation("Successfully triggered personal summary generation");
-            } else {
+            else
                 logger.LogWarning("Failed to trigger summary generation: {StatusCode}", response.StatusCode);
-            }
         }
         catch (Exception ex) {
             logger.LogError(ex, "Error triggering summary generation");

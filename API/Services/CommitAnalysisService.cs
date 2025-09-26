@@ -26,8 +26,8 @@ public class CommitAnalysisService(
 
     async Task<string> GeneratePersonalSummaryAsync() {
         try {
-            var commitData = await redisService.GetAsync<List<CommitData>>("github:commits");
-            if (commitData == null || commitData.Count == 0)
+            var repoData = await redisService.GetAsync<List<RepoData>>("github:repos");
+            if (repoData == null || repoData.Count == 0)
                 return "Hi, I'm Ryan! I'm currently working on some exciting projects. Check back soon for updates!";
 
             string ollamaUrl = configuration["Ollama:BaseUrl"] ?? "http://127.0.0.1:11434";
@@ -38,44 +38,43 @@ public class CommitAnalysisService(
                 HttpResponseMessage healthResponse = await healthClient.GetAsync($"{ollamaUrl}/api/tags");
                 if (!healthResponse.IsSuccessStatusCode) {
                     logger.LogWarning("Ollama health check failed, using fallback summary");
-                    return CreateFallbackSummary(commitData);
+                    return CreateFallbackSummary(repoData);
                 }
             }
             catch (Exception healthEx) {
                 logger.LogWarning(healthEx, "Ollama is not available, using fallback summary");
-                return CreateFallbackSummary(commitData);
+                return CreateFallbackSummary(repoData);
             }
 
-            // Get detailed commit information for analysis
-            var recentRepos = commitData
+            var recentRepos = repoData
                 .OrderByDescending(c => c.LastUpdated)
                 .Take(3)
                 .ToList();
 
             var commitDetails = new List<string>();
 
-            // Fetch actual commit messages for each repository
-            foreach (CommitData repo in recentRepos)
+            foreach (RepoData repo in recentRepos)
                 try {
-                    var commits = await redisService.GetAsync<List<CommitData>>("github:commits");
-                    commitDetails.Add($"{repo.RepositoryName}: {string.Join(", ", (commits ?? []).Take(3))}");
+                    var commitMessages =
+                        await redisService.GetAsync<List<string>>($"github:commits:{repo.RepositoryName}");
+                    if (commitMessages?.Count > 0) {
+                        var recentCommits = commitMessages.Take(3).ToList();
+                        commitDetails.Add($"{repo.RepositoryName}: {string.Join(", ", recentCommits)}");
+                    }
                 }
                 catch (Exception ex) {
-                    logger.LogWarning(ex, "Failed to fetch commits for {RepoName}", repo.RepositoryName);
+                    logger.LogWarning(ex, "Failed to fetch commit messages for {RepoName}", repo.RepositoryName);
                 }
 
-            // Log the commit details for debugging
             logger.LogInformation("Commit details for AI prompt: {CommitDetails}", string.Join(" | ", commitDetails));
 
-            // If no commit details, use repository names as fallback
             if (commitDetails.Count == 0) {
                 commitDetails = recentRepos.Select(r => $"{r.RepositoryName}: Recent updates").ToList();
                 logger.LogWarning("No commit details found, using repository names as fallback");
             }
 
-            // Try AI first, with robust fallback
             try {
-                string aiSummary = await GenerateAISummary();
+                string aiSummary = await GenerateAISummary(commitDetails);
                 if (!string.IsNullOrEmpty(aiSummary) && aiSummary.Length > 20) {
                     logger.LogInformation("Successfully generated AI summary: {Summary}", aiSummary);
                     return aiSummary;
@@ -85,7 +84,6 @@ public class CommitAnalysisService(
                 logger.LogWarning(aiEx, "AI generation failed, using fallback");
             }
 
-            // Fallback to formatted template-based response
             return CreateFormattedFallbackSummary(commitDetails);
         }
         catch (Exception ex) {
@@ -94,24 +92,29 @@ public class CommitAnalysisService(
         }
     }
 
-    public async Task InvalidateCacheAsync() {
+    public async Task InvalidateSummaryCacheAsync() {
         await redisService.DeleteAsync("ai:summary");
 
-        // Generate new summary and notify clients
         string newSummary = await GeneratePersonalSummaryAsync();
         await redisService.SetAsync("ai:summary", newSummary, TimeSpan.FromHours(24));
 
-        // Send SignalR update
         await hubContext.Clients.All.SendAsync("PersonalSummaryUpdated", newSummary);
 
         logger.LogInformation("Personal summary updated and broadcasted to clients");
     }
 
-    async Task<string> GenerateAISummary() {
+    async Task<string> GenerateAISummary(List<string> commitDetails) {
         string ollamaUrl = configuration["Ollama:BaseUrl"] ?? "http://127.0.0.1:11434";
-
+        string model = configuration["Ollama:Model"] ?? "tinyllama";
         HttpClient client = httpClientFactory.CreateClient();
+        client.Timeout = TimeSpan.FromSeconds(30);
+
+        string context = string.Join(" | ", commitDetails);
+        string prompt = $"Based on my recent work: {context}. I've been working on";
+
         var requestBody = new {
+            model = model,
+            prompt = prompt,
             stream = false,
             options = new {
                 temperature = 0.2, // Very low temperature for consistency
@@ -127,19 +130,16 @@ public class CommitAnalysisService(
             OllamaResponse? result = await response.Content.ReadFromJsonAsync<OllamaResponse>();
             string? summary = result?.response?.Trim();
 
-            if (!string.IsNullOrEmpty(summary)) {
-                // Simple cleanup - just remove quotes and trim
-                summary = summary.Trim('"', '\'', '`').Trim();
+            if (string.IsNullOrEmpty(summary)) return string.Empty;
+            summary = summary.Trim('"', '\'', '`').Trim();
 
-                // Basic validation - must start with "I've been working on"
-                if (summary.StartsWith("I've been working on", StringComparison.OrdinalIgnoreCase)) return summary;
-            }
+            if (summary.StartsWith("I've been working on", StringComparison.OrdinalIgnoreCase)) return summary;
         }
 
-        return string.Empty; // Will trigger fallback
+        return string.Empty;
     }
 
-    string CreateFallbackSummary(List<CommitData> commitData) {
+    string CreateFallbackSummary(List<RepoData> commitData) {
         var recentRepos = commitData
             .OrderByDescending(c => c.LastUpdated)
             .Take(3)
@@ -159,9 +159,4 @@ public class CommitAnalysisService(
 
         return summary.TrimEnd();
     }
-}
-
-public class OllamaResponse {
-    public string? response { get; set; }
-    public bool done { get; set; }
 }
