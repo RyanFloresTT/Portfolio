@@ -2,42 +2,27 @@ using GitHubSync.Services;
 
 namespace GitHubSync.Workers;
 
-public class GitHubSyncWorker : BackgroundService
-{
-    private readonly ILogger<GitHubSyncWorker> _logger;
-    private readonly GitHubDataWorker _gitHubDataWorker;
-    private readonly NotifyAPIService _signalRService;
+public class GitHubSyncWorker(
+    ILogger<GitHubSyncWorker> logger,
+    GitHubDataWorker gitHubDataWorker,
+    NotifyApiService signalRService)
+    : BackgroundService {
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken) {
+        try {
+            logger.LogInformation("Starting GitHub data sync at: {Time}", DateTimeOffset.Now);
 
-    public GitHubSyncWorker(
-        ILogger<GitHubSyncWorker> logger,
-        GitHubDataWorker gitHubDataWorker,
-        NotifyAPIService signalRService)
-    {
-        _logger = logger;
-        _gitHubDataWorker = gitHubDataWorker;
-        _signalRService = signalRService;
-    }
+            await gitHubDataWorker.FetchAndStoreGitHubData();
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        try
-        {
-            _logger.LogInformation("Starting GitHub data sync at: {Time}", DateTimeOffset.Now);
-            
-            await _gitHubDataWorker.FetchAndStoreGitHubData();
-            
-            _logger.LogInformation("GitHub data sync completed at: {Time}", DateTimeOffset.Now);
+            logger.LogInformation("GitHub data sync completed at: {Time}", DateTimeOffset.Now);
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error occurred during GitHub data sync");
+        catch (Exception ex) {
+            logger.LogError(ex, "Error occurred during GitHub data sync");
         }
     }
 
-    public override async Task StopAsync(CancellationToken cancellationToken)
-    {
-        _logger.LogInformation("GitHub sync worker is stopping");
-        await _signalRService.DisposeAsync();
+    public override async Task StopAsync(CancellationToken cancellationToken) {
+        logger.LogInformation("GitHub sync worker is stopping");
+        await signalRService.DisposeAsync();
         await base.StopAsync(cancellationToken);
     }
 }
