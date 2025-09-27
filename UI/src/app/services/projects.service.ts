@@ -14,7 +14,7 @@ export class ProjectsService {
       technologies: ['Angular', '.NET', 'SignalR', 'Redis', 'Docker', 'Kubernetes', 'TypeScript', 'Tailwind CSS'],
       status: 'completed',
       githubUrl: 'https://github.com/ryanflorestt/Portfolio',
-      liveUrl: 'https://www.trustytea.me/',
+      liveUrl: 'https://ryanflores.dev/',
       featured: true,
       startDate: new Date('2025-09-23'),
       endDate: undefined,

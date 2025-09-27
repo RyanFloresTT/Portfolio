@@ -42,7 +42,7 @@ public class CommitAnalysisService(
                     if (commitMessages?.Count > 0) {
                         var recentCommits = FilterOutPRCommits(commitMessages).Take(3).ToList();
                         if (recentCommits.Any()) {
-                            formattedCommits.Add($"**{repo.RepositoryName}:**");
+                            formattedCommits.Add($"{repo.RepositoryName}:");
                             foreach (var commit in recentCommits) {
                                 formattedCommits.Add($"• {commit}");
                             }

@@ -12,10 +12,11 @@ metadata:
 spec:
   tls:
   - hosts:
-    - trustytea.me
+    - ryanflores.dev
+    - api.ryanflores.dev
     secretName: portfolio-tls
   rules:
-  - host: trustytea.me
+  - host: ryanflores.dev
     http:
       paths:
       - path: /
@@ -25,17 +26,20 @@ spec:
             name: portfolio-frontend-service
             port:
               number: 80
-      - path: /api
-        pathType: Prefix
-        backend:
-          service:
-            name: portfolio-api-service
-            port:
-              number: 80
       - path: /blog
         pathType: Prefix
         backend:
           service:
             name: ghost-service
+            port:
+              number: 80
+  - host: api.ryanflores.dev
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: portfolio-api-service
             port:
               number: 80

@@ -44,7 +44,7 @@ app.UseCors();
 app.MapHub<PortfolioHub>("/portfolioHub");
 
 app.MapGet("/", async (RedisService redisService) => {
-    var commitData = await redisService.GetAsync<List<RepoData>>("github:commits");
+    var commitData = await redisService.GetAsync<List<RepoData>>("github:repos");
     return Results.Ok(commitData ?? new List<RepoData>());
 });
 
@@ -53,13 +53,13 @@ app.MapGet("/personal-summary", async (CommitAnalysisService commitAnalysisServi
     return Results.Ok(new { summary });
 });
 
-app.MapPost("/api/notify/commit-data-updated",
+app.MapPost("/notify/commit-data-updated",
     async (List<RepoData> commitData, IHubContext<PortfolioHub> hubContext) => {
         await hubContext.Clients.All.SendAsync("CommitDataUpdated", commitData);
         return Results.Ok();
     });
 
-app.MapPost("/api/notify/personal-summary-updated", async (string summary, IHubContext<PortfolioHub> hubContext) => {
+app.MapPost("/notify/personal-summary-updated", async (string summary, IHubContext<PortfolioHub> hubContext) => {
     await hubContext.Clients.All.SendAsync("PersonalSummaryUpdated", summary);
     return Results.Ok();
 });
