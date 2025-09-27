@@ -6,16 +6,6 @@ services:
     networks:
       - portfolio-network
 
-  ollama:
-    image: ollama/ollama:latest
-    ports:
-      - "11434:11434"
-    environment:
-      - OLLAMA_HOST=0.0.0.0
-    volumes:
-      - ollama_data:/root/.ollama
-    networks:
-      - portfolio-network
  
   ghost:
     image: ghost:alpine
@@ -40,13 +30,10 @@ services:
       - "30081:8080"
     environment:
       - ConnectionStrings__Redis=redis:6379
-      - Ollama__BaseUrl=http://ollama:11434
-      - Ollama__Model=llama3.2
       - Github__Token=${GITHUB_TOKEN}
       - SignalR__HubUrl=http://localhost:30081/portfolioHub
     depends_on:
       - redis
-      - ollama
     networks:
       - portfolio-network
 
@@ -62,7 +49,6 @@ services:
       - portfolio-network
 
 volumes:
-  ollama_data:
   ghost_data:
 
 networks:

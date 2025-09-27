@@ -35,19 +35,19 @@ import { PortfolioService } from '../../services/portfolio.service';
                 <div class="grid grid-cols-2 gap-4">
                   <div class="bg-blue-50 dark:bg-blue-900 p-3 rounded-lg">
                     <h4 class="font-semibold text-blue-800 dark:text-blue-200 mb-1">Frontend</h4>
-                    <p class="text-sm text-blue-700 dark:text-blue-300">Angular 17, Tailwind CSS, TypeScript</p>
+                    <p class="text-sm text-blue-700 dark:text-blue-300">Angular, Tailwind CSS, TypeScript</p>
                   </div>
                   <div class="bg-green-50 dark:bg-green-900 p-3 rounded-lg">
                     <h4 class="font-semibold text-green-800 dark:text-green-200 mb-1">Backend</h4>
-                    <p class="text-sm text-green-700 dark:text-green-300">.NET 8, SignalR, Entity Framework</p>
+                    <p class="text-sm text-green-700 dark:text-green-300">.NET, SignalR, Background Workers</p>
                   </div>
                   <div class="bg-purple-50 dark:bg-purple-900 p-3 rounded-lg">
                     <h4 class="font-semibold text-purple-800 dark:text-purple-200 mb-1">Infrastructure</h4>
                     <p class="text-sm text-purple-700 dark:text-purple-300">Docker, Kubernetes, Redis</p>
                   </div>
                   <div class="bg-orange-50 dark:bg-orange-900 p-3 rounded-lg">
-                    <h4 class="font-semibold text-orange-800 dark:text-orange-200 mb-1">AI Integration</h4>
-                    <p class="text-sm text-orange-700 dark:text-orange-300">Ollama, Llama 3.2</p>
+                    <h4 class="font-semibold text-orange-800 dark:text-orange-200 mb-1">Data Processing</h4>
+                    <p class="text-sm text-orange-700 dark:text-orange-300">GitHub API, Commit Analysis</p>
                   </div>
                 </div>
               </div>
@@ -112,8 +112,8 @@ import { PortfolioService } from '../../services/portfolio.service';
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
                   </svg>
                 </div>
-                <h4 class="font-semibold text-gray-800 dark:text-gray-200 mb-2">AI-Powered</h4>
-                <p class="text-sm text-gray-600 dark:text-gray-400">Personal summaries generated using Ollama and Llama 3.2 based on recent commits</p>
+                <h4 class="font-semibold text-gray-800 dark:text-gray-200 mb-2">Recent Activity</h4>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Live updates showing recent commits from top repositories with intelligent filtering</p>
               </div>
               
               <div class="text-center">
@@ -142,7 +142,7 @@ import { PortfolioService } from '../../services/portfolio.service';
                   <h4 class="font-semibold text-gray-800 dark:text-gray-200 mb-2">Backend Services</h4>
                   <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
                     <li>• GitHub Data Service - Automated commit fetching</li>
-                    <li>• Commit Analysis Service - AI-powered summaries</li>
+                    <li>• Commit Analysis Service - Recent commits formatting</li>
                     <li>• Redis Service - Caching and session management</li>
                     <li>• SignalR Hub - Real-time communication</li>
                   </ul>
@@ -150,7 +150,6 @@ import { PortfolioService } from '../../services/portfolio.service';
                 <div>
                   <h4 class="font-semibold text-gray-800 dark:text-gray-200 mb-2">Frontend Features</h4>
                   <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                    <li>• Real-time data visualization</li>
                     <li>• Responsive design with Tailwind CSS</li>
                     <li>• TypeScript for type safety</li>
                     <li>• Standalone Angular components</li>
@@ -161,7 +160,7 @@ import { PortfolioService } from '../../services/portfolio.service';
           </div>
 
           <!-- Call to Action -->
-          <div class="mt-8 pt-6 border-t border-gray-200 text-center">
+          <!-- <div class="mt-8 pt-6 border-t border-gray-200 text-center">
             <p class="text-gray-600 dark:text-gray-400 mb-4">Want to learn more about the technical implementation?</p>
             <a href="http://localhost:30080" target="_blank" rel="noopener noreferrer" 
                class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-green-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-green-700 hover:-translate-y-0.5 transition-all duration-200 shadow-md hover:shadow-lg">
@@ -174,7 +173,7 @@ import { PortfolioService } from '../../services/portfolio.service';
               </svg>
               Read the detailed technical blog post
             </a>
-          </div>
+          </div> -->
         </div>
       </div>
     </div>

@@ -24,12 +24,12 @@ spec:
         - name: database__connection__filename
           value: "/var/lib/ghost/content/data/ghost.db"
         - name: url
-          value: "http://trustytea.me/blog"
+          value: "http://167.172.27.59/blog"
         - name: server__host
           value: "0.0.0.0"
         - name: server__port
           value: "2368"
-        resources:
+        resources:  
           requests:
             memory: "256Mi"
             cpu: "100m"

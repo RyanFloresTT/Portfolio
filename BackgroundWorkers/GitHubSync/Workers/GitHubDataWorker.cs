@@ -74,7 +74,7 @@ public class GitHubDataWorker(
                     logger.LogWarning(ex, "Failed to store commit messages for {RepoName}", repo.RepositoryName);
                 }
 
-            await redisService.DeleteAsync("ai:summary");
+            await redisService.DeleteAsync("recent-commits-summary");
 
             await notifyApiService.NotifyCommitDataUpdated(repoDataList);
 
@@ -89,10 +89,11 @@ public class GitHubDataWorker(
             string apiBaseUrl = configuration["API:BaseUrl"] ?? "http://portfolio-api-service";
             HttpClient client = httpClientFactory.CreateClient();
 
-            HttpResponseMessage response = await client.PostAsync($"{apiBaseUrl}/api/notify/generate-summary", null);
+            // Trigger the commit summary regeneration
+            HttpResponseMessage response = await client.PostAsync($"{apiBaseUrl}/regenerate-summary", null);
 
             if (response.IsSuccessStatusCode)
-                logger.LogInformation("Successfully triggered personal summary generation");
+                logger.LogInformation("Successfully triggered recent commits summary generation");
             else
                 logger.LogWarning("Failed to trigger summary generation: {StatusCode}", response.StatusCode);
         }
