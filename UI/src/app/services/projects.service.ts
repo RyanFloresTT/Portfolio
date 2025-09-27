@@ -183,13 +183,14 @@ export class ProjectsService {
   },
   {
     id: 'gbjam11',
-    name: 'GBJAM11 Entry',
+    name: 'Hopscape',
     description: 'A Game Boy-styled game created for the GBJAM11 game jam competition.',
     category: 'game',
     tags: ['game-dev', 'pixel-art', 'unity', 'game-jam', 'team-project'],
     status: 'completed',
     featured: false,
     githubUrl: 'https://github.com/RyanFloresTT/GBJAM11',
+    liveUrl: 'https://ryanflorestt.itch.io/hopscape',
     technologies: ['Game Development', 'Pixel Art', 'Unity'],
   },
   {
