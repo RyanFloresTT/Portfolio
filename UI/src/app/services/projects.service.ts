@@ -162,13 +162,62 @@ export class ProjectsService {
   {
     id: 'wraeclib',
     name: 'Wraeclib',
-    description: 'A .NET API wrapper for the Path of Exile API, making it easier for developers to integrate PoE data into their applications.',
+    description: 'I\'m building a .NET client library for the Path of Exile API because I got tired of dealing with raw HTTP requests every time I wanted to mess around with PoE data.',
+    longDescription: 'As someone who\'s spent way too much time playing Path of Exile, I kept finding myself wanting to build tools that interact with GGG\'s API. Every time I started a new project, I\'d end up writing the same HTTP client code over and over again. So I decided to just build a proper library that handles all the boring stuff like authentication, rate limiting, and data parsing. I was inspired to build this from a similar libary for interacting with the World of Warcraft API.',
     category: 'api',
-    tags: ['api', 'wrapper', 'dotnet'],
+    tags: ['api', 'gaming', 'dotnet', 'open-source'],
     status: 'in-progress',
-    featured: false,
+    featured: true,
     githubUrl: 'https://github.com/RyanFloresTT/Wraeclib/',
-    technologies: ['C#', '.NET', 'NuGet']
+    technologies: ['C#', '.NET 9', 'NuGet', 'Path of Exile API'],
+    startDate: new Date('2025-09-24'),
+    endDate: undefined,
+    challenges: [
+      'Getting OAuth approval from GGG',
+      'Designing a clean, intuitive API that doesn\'t feel clunky to use',
+      'Planning for Path of Exile 2 support when the API eventually drops'
+    ],
+    achievements: [
+      'Got the basic league and ladder endpoints working smoothly!',
+      'Implemented a builder pattern that actually feels nice to use',
+    ],
+    hasDetailedView: true,
+    detailedContent: {
+      overview: 'Wraeclib is my take on making Path of Exile API integration actually enjoyable. I\'m building this because I\'ve noticed a lack of .NET libraries for PoE, and I figured I might as well build the one I wish existed.',
+      problemStatement: 'I love Path of Exile, but working with any API directly is kind of a pain. You need to handle user agents, deal with rate limiting, parse JSON responses, and remember all the endpoint quirks. I kept writing the same boilerplate code every time I wanted to build something cool with PoE data.',
+      solution: 'I decided to build a proper .NET client library that abstracts away all the annoying stuff. It uses a builder pattern for configuration, has strongly-typed models for all the data, and handles errors gracefully. The goal is to make it so easy that you can start pulling PoE data in like 3 lines of code.',
+      keyFeatures: [
+        'Clean builder pattern for configuration',
+        'Strongly-typed models for all PoE data structures',
+        'Built-in rate limiting and error handling',
+        'Support for both public and authenticated endpoints',
+      ],
+      technicalDecisions: [
+        {
+          decision: 'Used .NET 9 and modern C# features',
+          reasoning: 'I wanted to use the latest language features and take advantage of improved performance. Plus, the target audience for a PoE API library is likely to be using recent .NET versions.',
+          alternatives: ['Target older .NET versions', 'Use a different language entirely'],
+          impact: 'Cleaner code with better performance, but limits compatibility with older projects.'
+        },
+        {
+          decision: 'Implemented a builder pattern for client configuration',
+          reasoning: 'Configuration can get complex with user agents, OAuth tokens, timeouts, etc. A builder pattern makes it feel natural and prevents configuration mistakes.',
+          alternatives: ['Traditional constructor with parameters', 'Configuration object'],
+          impact: 'Much cleaner API usage and better discoverability of configuration options.'
+        }
+      ],
+      lessonsLearned: [
+        'GGG\'s API documentation isn\'t currently complete',
+        'Building a library that others will use requires thinking about edge cases you\'d never consider in a personal project',
+      ],
+      futureImprovements: [
+        'Add character and account data endpoints when I get my OAuth approval',
+        'Build some example applications showing off what you can do with the library',
+        'Add support for PoE 2 API when it launches'
+      ],
+      teamSize: 1,
+      myRole: 'Library Author & Maintainer'
+    }
   },
   {
     id: 'devlog',
