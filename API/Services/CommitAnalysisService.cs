@@ -107,7 +107,7 @@ public class CommitAnalysisService(
         string ollamaUrl = configuration["Ollama:BaseUrl"] ?? "http://127.0.0.1:11434";
         string model = configuration["Ollama:Model"] ?? "tinyllama";
         HttpClient client = httpClientFactory.CreateClient();
-        client.Timeout = TimeSpan.FromSeconds(30);
+        client.Timeout = TimeSpan.FromSeconds(120); // Increased timeout
 
         string context = string.Join(" | ", commitDetails);
         string prompt = $"Based on my recent work: {context}. I've been working on";
@@ -117,26 +117,53 @@ public class CommitAnalysisService(
             prompt = prompt,
             stream = false,
             options = new {
-                temperature = 0.2, // Very low temperature for consistency
-                num_predict = 50, // Very short response
-                top_p = 0.8,
-                top_k = 20
+                temperature = 0.7, // Slightly higher for better responses
+                num_predict = 30, // Shorter response to reduce processing time
+                top_p = 0.9,
+                top_k = 40
             }
         };
 
-        HttpResponseMessage response = await client.PostAsJsonAsync($"{ollamaUrl}/api/generate", requestBody);
+        try {
+            logger.LogInformation("Sending request to Ollama: {Url} with model: {Model}", $"{ollamaUrl}/api/generate", model);
+            logger.LogInformation("Prompt: {Prompt}", prompt);
+            
+            HttpResponseMessage response = await client.PostAsJsonAsync($"{ollamaUrl}/api/generate", requestBody);
+            
+            logger.LogInformation("Ollama response status: {StatusCode}", response.StatusCode);
 
-        if (response.IsSuccessStatusCode) {
-            OllamaResponse? result = await response.Content.ReadFromJsonAsync<OllamaResponse>();
-            string? summary = result?.response?.Trim();
+            if (response.IsSuccessStatusCode) {
+                OllamaResponse? result = await response.Content.ReadFromJsonAsync<OllamaResponse>();
+                string? summary = result?.response?.Trim();
 
-            if (string.IsNullOrEmpty(summary)) return string.Empty;
-            summary = summary.Trim('"', '\'', '`').Trim();
+                if (string.IsNullOrEmpty(summary)) {
+                    logger.LogWarning("Empty response from Ollama");
+                    return string.Empty;
+                }
+                
+                summary = summary.Trim('"', '\'', '`').Trim();
+                logger.LogInformation("Ollama generated summary: {Summary}", summary);
 
-            if (summary.StartsWith("I've been working on", StringComparison.OrdinalIgnoreCase)) return summary;
+                if (summary.StartsWith("I've been working on", StringComparison.OrdinalIgnoreCase)) {
+                    return summary;
+                } else {
+                    logger.LogWarning("Summary doesn't start with expected prefix: {Summary}", summary);
+                    return string.Empty;
+                }
+            } else {
+                string errorContent = await response.Content.ReadAsStringAsync();
+                logger.LogError("Ollama request failed with status {StatusCode}: {Error}", response.StatusCode, errorContent);
+                return string.Empty;
+            }
         }
-
-        return string.Empty;
+        catch (TaskCanceledException ex) {
+            logger.LogError(ex, "Ollama request timed out after {Timeout} seconds", client.Timeout.TotalSeconds);
+            return string.Empty;
+        }
+        catch (Exception ex) {
+            logger.LogError(ex, "Error calling Ollama API");
+            return string.Empty;
+        }
     }
 
     string CreateFallbackSummary(List<RepoData> commitData) {
