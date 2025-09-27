@@ -120,6 +120,13 @@ export const PROJECT_CATEGORIES: ProjectCategory[] = [
     color: 'pink'
   },
   {
+    id: 'game',
+    name: 'Game Development',
+    description: 'Game development projects',
+    icon: '🎮',
+    color: 'red'
+  },
+  {
     id: 'other',
     name: 'Other',
     description: 'Miscellaneous projects and experiments',
