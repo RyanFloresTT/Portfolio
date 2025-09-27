@@ -9,26 +9,26 @@ export class ProjectsService {
     {
       id: 'portfolio',
       name: 'Portfolio Website',
-      description: 'A modern, real-time portfolio showcasing my development work with live GitHub integration and AI-powered summaries.',
+      description: 'A new and improved portfolio website, showcasing my work with .NET, Angular, and SignalR. I\'ve also set this up to be a fully containerized application, with a Kubernetes deployment.',
       longDescription: 'This portfolio represents a comprehensive showcase of modern web development practices, featuring real-time data visualization, AI integration, and containerized deployment. The application demonstrates full-stack development skills with a focus on performance, user experience, and maintainable architecture.',
-      technologies: ['Angular', '.NET 8', 'SignalR', 'Redis', 'Docker', 'Kubernetes', 'Ollama', 'TypeScript', 'Tailwind CSS'],
+      technologies: ['Angular', '.NET', 'SignalR', 'Redis', 'Docker', 'Kubernetes', 'Ollama', 'TypeScript', 'Tailwind CSS'],
       status: 'completed',
       githubUrl: 'https://github.com/ryanflorestt/Portfolio',
       liveUrl: 'http://localhost:30082/',
       featured: true,
-      startDate: new Date('2024-01-01'),
-      endDate: new Date('2024-12-01'),
+      startDate: new Date('2025-09-23'),
+      endDate: new Date('2025-09-26'),
       category: 'web',
       tags: ['portfolio', 'real-time', 'ai', 'containerization'],
       challenges: [
         'Implementing real-time data synchronization with SignalR',
         'Integrating local AI models for content generation',
-        'Setting up containerized deployment pipeline'
+        'Working with Kubernetes for the first time'
       ],
       achievements: [
-        'Achieved 99.9% uptime with containerized deployment',
-        'Reduced page load time to under 2 seconds',
-        'Implemented automated GitHub data synchronization'
+        'Learned more about how to use Kubernetes!',
+        'Worked with a local AI model for the first time!',
+        'Implemented automated GitHub data synchronization!'
       ],
       hasDetailedView: true,
       blogPostUrl: 'https://blog.example.com/portfolio-development-journey',
@@ -56,11 +56,8 @@ Infrastructure
         keyFeatures: [
           'Real-time GitHub commit visualization with interactive heatmaps',
           'AI-powered commit analysis and summaries using local Ollama models',
-          'Responsive design with dark/light mode support',
           'Containerized deployment with zero-downtime updates',
           'Automated data synchronization with GitHub APIs',
-          'Performance monitoring and optimization',
-          'SEO-optimized with server-side rendering capabilities'
         ],
         technicalDecisions: [
           {
@@ -80,256 +77,90 @@ Infrastructure
             reasoning: 'Standalone components provide better tree-shaking, improved performance, and simplified dependency management.',
             alternatives: ['Angular modules', 'React', 'Vue.js'],
             impact: 'Reduced bundle size by 15% and improved application startup time.'
+          },
+          {
+            decision: 'Stored project data here in the projects.service.ts file',
+            reasoning: 'This is a simple way to store project data, and it is easy to update and manage, and since Angular builds these pages, it\'s super fast to load them.',
+            alternatives: ['A database', 'A server-side API'],
+            impact: 'Reduced bundle size by 15% and improved application startup time.'
           }
         ],
         lessonsLearned: [
-          'Container orchestration with Kubernetes requires careful resource planning and monitoring',
-          'Real-time applications need robust error handling and reconnection logic',
-          'AI model integration requires careful prompt engineering and response validation',
-          'Performance optimization is crucial for real-time data visualization',
-          'Automated testing becomes more complex with real-time and AI components'
+          'Working with Kubernetes on tight memory budgets requires constant tradeoff decisions, I had to sacrifice Ollama memory allocation to fit everything in',
+          'AI integration is very hit-or-miss! Sometimes it works great, sometimes fails completely, and I\'m still not entirely convinced of its value',
         ],
         futureImprovements: [
-          'Implement WebRTC for peer-to-peer communication features',
-          'Add support for multiple AI models and model comparison',
-          'Integrate with additional development platforms (GitLab, Bitbucket)',
-          'Implement advanced analytics and insights dashboard',
-          'Add collaborative features for team projects',
-          'Implement progressive web app (PWA) capabilities'
+          'Add an interactive timeline showing my career progression and key milestones',
+          'Include a resume section with viewing and PDF download capabilities',
+          'Transform this into a reusable template that other developers can customize for their own portfolios',
         ],
         metrics: [
           {
-            name: 'Page Load Time',
-            value: '< 2 seconds',
-            description: 'Initial page load time',
-            improvement: '60% faster than initial implementation'
+            name: 'Memory Usage',
+            value: '3 GB',
+            description: 'Production memory usage',
+            improvement: 'Reduced from 4 GB to 3 GB'
           },
           {
-            name: 'Uptime',
-            value: '99.9%',
-            description: 'Application availability',
-            improvement: 'Achieved through containerized deployment'
+            name: 'Real-time Latency',
+            value: '< 50ms',
+            description: 'SignalR message delivery time',
+            improvement: 'Near-instant updates with WebSockets'
           },
           {
             name: 'AI Response Time',
-            value: '< 3 seconds',
-            description: 'Time to generate commit summaries',
-            improvement: 'Optimized with local models and caching'
-          },
-          {
-            name: 'Bundle Size',
-            value: '2.1 MB',
-            description: 'Production bundle size',
-            improvement: '15% reduction with standalone components'
+            value: '2.8s',
+            description: 'Average Ollama AI model response time',
+            improvement: 'Optimized prompts and model parameters'
           }
         ],
         timeline: [
           {
-            date: new Date('2024-01-01'),
+            date: new Date('2025-09-23'),
             title: 'Project Planning & Architecture',
             description: 'Defined requirements, selected technologies, and designed system architecture',
             completed: true
           },
           {
-            date: new Date('2024-02-01'),
+            date: new Date('2025-09-23'),
             title: 'Backend Development',
             description: 'Implemented .NET 8 API, SignalR hubs, and GitHub integration',
             completed: true
           },
           {
-            date: new Date('2024-03-01'),
+            date: new Date('2025-09-24'),
             title: 'Frontend Development',
             description: 'Built Angular application with real-time data visualization',
             completed: true
           },
           {
-            date: new Date('2024-04-01'),
-            title: 'AI Integration',
-            description: 'Integrated Ollama for local AI model processing',
+            date: new Date('2025-09-25'),
+            title: 'GitHub Data Sync Worker',
+            description: 'Created a worker to fetch and store GitHub data in Redis',
             completed: true
           },
           {
-            date: new Date('2024-05-01'),
+            date: new Date('2025-09-25'),
             title: 'Containerization & Deployment',
             description: 'Set up Docker containers and Kubernetes deployment',
             completed: true
           },
           {
-            date: new Date('2024-06-01'),
+            date: new Date('2025-09-26'),
             title: 'Performance Optimization',
             description: 'Optimized bundle size, caching, and real-time performance',
             completed: true
-          }
-        ],
-        teamSize: 1,
-        myRole: 'Full-stack Developer, DevOps Engineer, UI/UX Designer',
-        codeSnippets: [
-          {
-            title: 'SignalR Hub Implementation',
-            language: 'csharp',
-            code: `[Hub]
-public class PortfolioHub : Hub
-{
-    private readonly ICommitAnalysisService _commitService;
-    private readonly IRedisService _redisService;
-
-    public async Task JoinGroup(string groupName)
-    {
-        await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
-    }
-
-    public async Task GetCommitAnalysis(string repository)
-    {
-        var cached = await _redisService.GetAsync<CommitAnalysis>($"analysis:{repository}");
-        if (cached != null)
-        {
-            await Clients.Caller.SendAsync("CommitAnalysisReceived", cached);
-            return;
-        }
-
-        var analysis = await _commitService.AnalyzeCommitsAsync(repository);
-        await _redisService.SetAsync($"analysis:{repository}", analysis, TimeSpan.FromHours(24));
-        await Clients.Caller.SendAsync("CommitAnalysisReceived", analysis);
-    }
-}`,
-            description: 'SignalR hub handling real-time commit analysis with Redis caching'
           },
           {
-            title: 'Angular SignalR Service',
-            language: 'typescript',
-            code: `@Injectable({ providedIn: 'root' })
-export class SignalRService {
-  private connection: signalR.HubConnection;
-  
-  constructor() {
-    this.connection = new signalR.HubConnectionBuilder()
-      .withUrl('/portfolioHub')
-      .build();
-  }
-
-  async startConnection(): Promise<void> {
-    try {
-      await this.connection.start();
-      console.log('SignalR Connected');
-    } catch (err) {
-      console.error('Error starting SignalR connection:', err);
-      setTimeout(() => this.startConnection(), 5000);
-    }
-  }
-
-  getCommitAnalysis(repository: string): Observable<CommitAnalysis> {
-    return new Observable(observer => {
-      this.connection.on('CommitAnalysisReceived', (data: CommitAnalysis) => {
-        observer.next(data);
-      });
-      
-      this.connection.invoke('GetCommitAnalysis', repository);
-    });
-  }
-}`,
-            description: 'Angular service for managing SignalR connection and real-time data'
-          }
+            date: new Date('2025-09-27'),
+            title: 'Public Launch & Blog Integration',
+            description: 'Deploy to production domain, set up Ghost CMS, and publish first blog post',
+            completed: false
+          },
         ],
-        additionalScreenshots: [
-          'assets/screenshots/portfolio-dashboard.png',
-          'assets/screenshots/portfolio-heatmap.png',
-          'assets/screenshots/portfolio-ai-analysis.png',
-          'assets/screenshots/portfolio-mobile.png'
-        ],
-        relatedProjects: ['ai-integration', 'containerized-deployment', 'real-time-dashboard']
+        teamSize: 1,
+        myRole: 'Full-stack Developer'
       }
-    },
-    {
-      id: 'ai-integration',
-      name: 'AI-Powered Commit Analysis',
-      description: 'Real-time analysis of GitHub commits using local AI models to generate personalized summaries.',
-      longDescription: 'A sophisticated system that analyzes GitHub commit patterns and generates contextual summaries using local AI models. This project demonstrates advanced integration of AI services with web applications.',
-      technologies: ['C#', 'Ollama', 'Llama 3.2', 'SignalR', 'Redis', 'GitHub API'],
-      status: 'completed',
-      featured: true,
-      startDate: new Date('2024-02-01'),
-      endDate: new Date('2024-03-01'),
-      category: 'ai',
-      tags: ['ai', 'github', 'analysis', 'automation'],
-      challenges: [
-        'Optimizing AI model performance for real-time responses',
-        'Handling large volumes of GitHub API data',
-        'Implementing intelligent caching strategies'
-      ],
-      achievements: [
-        'Reduced AI response time to under 3 seconds',
-        'Achieved 95% accuracy in commit analysis',
-        'Implemented intelligent caching with 24-hour TTL'
-      ]
-    },
-    {
-      id: 'containerized-deployment',
-      name: 'Containerized Deployment Pipeline',
-      description: 'Full-stack application deployment using Docker and Kubernetes with automated CI/CD.',
-      longDescription: 'A comprehensive DevOps solution that automates the deployment of full-stack applications using modern containerization technologies.',
-      technologies: ['Docker', 'Kubernetes', 'GitHub Actions', 'Nginx', 'YAML'],
-      status: 'completed',
-      featured: false,
-      startDate: new Date('2024-01-15'),
-      endDate: new Date('2024-02-15'),
-      category: 'devops',
-      tags: ['devops', 'docker', 'kubernetes', 'cicd'],
-      challenges: [
-        'Setting up multi-stage Docker builds for optimization',
-        'Configuring Kubernetes services and ingress',
-        'Implementing automated health checks'
-      ],
-      achievements: [
-        'Reduced deployment time from 30 minutes to 5 minutes',
-        'Achieved zero-downtime deployments',
-        'Implemented automated rollback capabilities'
-      ]
-    },
-    {
-      id: 'real-time-dashboard',
-      name: 'Real-time Development Dashboard',
-      description: 'Live visualization of development activity with real-time updates and interactive heatmaps.',
-      longDescription: 'An interactive dashboard that provides real-time insights into development activity, featuring dynamic visualizations and responsive design.',
-      technologies: ['Angular', 'SignalR', 'TypeScript', 'Tailwind CSS', 'Chart.js'],
-      status: 'completed',
-      featured: false,
-      startDate: new Date('2024-01-01'),
-      endDate: new Date('2024-01-31'),
-      category: 'web',
-      tags: ['dashboard', 'real-time', 'visualization', 'responsive'],
-      challenges: [
-        'Implementing smooth real-time data updates',
-        'Creating responsive heatmap visualizations',
-        'Optimizing performance for large datasets'
-      ],
-      achievements: [
-        'Achieved 60fps smooth animations',
-        'Implemented responsive design for all screen sizes',
-        'Reduced data transfer by 40% with efficient updates'
-      ]
-    },
-    {
-      id: 'blog-cms',
-      name: 'Ghost CMS Integration',
-      description: 'Integrated Ghost CMS for technical blog posts and content management.',
-      longDescription: 'A seamless integration of Ghost CMS with the portfolio application, providing a robust content management system for technical blog posts.',
-      technologies: ['Ghost', 'Docker', 'SQLite', 'Nginx', 'JavaScript'],
-      status: 'completed',
-      featured: false,
-      startDate: new Date('2024-02-01'),
-      endDate: new Date('2024-02-28'),
-      category: 'web',
-      tags: ['cms', 'blog', 'content', 'integration'],
-      challenges: [
-        'Configuring Ghost for production deployment',
-        'Setting up automated backups',
-        'Optimizing content delivery'
-      ],
-      achievements: [
-        'Achieved 99.5% content delivery reliability',
-        'Implemented automated backup system',
-        'Optimized page load times for blog content'
-      ]
     }
   ]);
 
