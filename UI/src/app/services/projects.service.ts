@@ -17,7 +17,7 @@ export class ProjectsService {
       liveUrl: 'https://www.trustytea.me/',
       featured: true,
       startDate: new Date('2025-09-23'),
-      endDate: new Date('2025-09-28'),
+      endDate: undefined,
       category: 'web',
       tags: ['portfolio', 'real-time', 'data-processing', 'containerization'],
       challenges: [
@@ -181,76 +181,123 @@ export class ProjectsService {
       'Got the basic league and ladder endpoints working smoothly!',
       'Implemented a builder pattern that actually feels nice to use',
     ],
-    hasDetailedView: true,
-    detailedContent: {
-      overview: 'Wraeclib is my take on making Path of Exile API integration actually enjoyable. I\'m building this because I\'ve noticed a lack of .NET libraries for PoE, and I figured I might as well build the one I wish existed.',
-      problemStatement: 'I love Path of Exile, but working with any API directly is kind of a pain. You need to handle user agents, deal with rate limiting, parse JSON responses, and remember all the endpoint quirks. I kept writing the same boilerplate code every time I wanted to build something cool with PoE data.',
-      solution: 'I decided to build a proper .NET client library that abstracts away all the annoying stuff. It uses a builder pattern for configuration, has strongly-typed models for all the data, and handles errors gracefully. The goal is to make it so easy that you can start pulling PoE data in like 3 lines of code.',
-      keyFeatures: [
-        'Clean builder pattern for configuration',
-        'Strongly-typed models for all PoE data structures',
-        'Built-in rate limiting and error handling',
-        'Support for both public and authenticated endpoints',
-      ],
-      technicalDecisions: [
-        {
-          decision: 'Used .NET 9 and modern C# features',
-          reasoning: 'I wanted to use the latest language features and take advantage of improved performance. Plus, the target audience for a PoE API library is likely to be using recent .NET versions.',
-          alternatives: ['Target older .NET versions', 'Use a different language entirely'],
-          impact: 'Cleaner code with better performance, but limits compatibility with older projects.'
-        },
-        {
-          decision: 'Implemented a builder pattern for client configuration',
-          reasoning: 'Configuration can get complex with user agents, OAuth tokens, timeouts, etc. A builder pattern makes it feel natural and prevents configuration mistakes.',
-          alternatives: ['Traditional constructor with parameters', 'Configuration object'],
-          impact: 'Much cleaner API usage and better discoverability of configuration options.'
-        }
-      ],
-      lessonsLearned: [
-        'GGG\'s API documentation isn\'t currently complete',
-        'Building a library that others will use requires thinking about edge cases you\'d never consider in a personal project',
-      ],
-      futureImprovements: [
-        'Add character and account data endpoints when I get my OAuth approval',
-        'Build some example applications showing off what you can do with the library',
-        'Add support for PoE 2 API when it launches'
-      ],
-      teamSize: 1,
-      myRole: 'Library Author & Maintainer'
-    }
+    hasDetailedView: false
   },
   {
     id: 'devlog',
     name: 'DevLog',
-    description: 'A local developer logging platform built with Ruby and Tailwind CSS to track coding progress and learning journey. Containerized with Docker.',
+    description: 'I built this because I wanted to actually track my coding sessions properly instead of just vaguely remembering what I worked on. It lets you create projects, log work sessions with opening/closing notes, and export everything as markdown for blogging.',
+    longDescription: 'I was getting frustrated with not having a good way to track my development work. I wanted something simple where I could create a project, start a session when I sit down to code, add notes about what I\'m working on and any blockers I hit, then close it out with closing thoughts. Plus I wanted to be able to export everything as markdown to kickstart blog posts about my projects.',
     category: 'web',
-    tags: ['web', 'developer-log', 'ruby', 'postgresql'],
+    tags: ['web', 'productivity', 'ruby', 'rails'],
     status: 'completed',
-    featured: false,
+    featured: true,
     githubUrl: 'https://github.com/RyanFloresTT/DevLog',
-    technologies: ['Ruby', 'Tailwind CSS', 'Docker']
+    technologies: ['Ruby on Rails', 'Tailwind CSS', 'Docker', 'PostgreSQL'],
+    startDate: new Date('2024-04-12'),
+    endDate: new Date('2024-04-15'),
+    challenges: [
+      'Learning Rails',
+      'Getting the session flow to feel natural and not intrusive',
+      'Making the export functionality actually useful for blogging'
+    ],
+    achievements: [
+      'Actually shipped something with Rails for the first time!',
+      'The session logging flow feels really smooth to use',
+      'Export to markdown works perfectly for turning sessions into blog posts'
+    ],
+    hasDetailedView: false
   },
   {
     id: 'gbjam11',
     name: 'Hopscape',
-    description: 'A Game Boy-styled game created for the GBJAM11 game jam competition.',
+    description: 'My first game jam collaboration with my friend Robby! We built this Game Boy-styled game for GBJAM11 and learned a ton about working together on game development. It was a really fun experience that actually led to us working on Super Hangman together with Robby later.',
+    longDescription: 'This was my first time working with Robby on a game project, and it was honestly a blast. We decided to enter GBJAM11 (a game jam focused on Game Boy aesthetics) and built this little game called Hopscape. The whole experience taught me a lot about collaborative game development and how different our approaches to coding can be.',
     category: 'game',
     tags: ['game-dev', 'pixel-art', 'unity', 'game-jam', 'team-project'],
     status: 'completed',
     featured: false,
     githubUrl: 'https://github.com/RyanFloresTT/GBJAM11',
     liveUrl: 'https://ryanflorestt.itch.io/hopscape',
-    technologies: ['Game Development', 'Pixel Art', 'Unity'],
+    technologies: ['Unity', 'C#', 'Pixel Art', 'Game Boy Style'],
+    startDate: new Date('2023-09-14'),
+    endDate: new Date('2023-09-24'),
+    challenges: [
+      'Learning to collaborate effectively on game development',
+      'Working within the Game Boy aesthetic constraints',
+      'Managing time during a game jam with team coordination'
+    ],
+    achievements: [
+      'Successfully shipped our first collaborative game!',
+      'Learned how to work with someone else\'s coding style',
+      'Created something that actually felt like a real Game Boy game'
+    ],
+    hasDetailedView: false
   },
   {
     id: 'super-hangman',
     name: 'Super Hangman',
-    description: 'A modern take on the classic Hangman game, released on Steam with enhanced features and gameplay mechanics.',
+    description: 'This was such a cool project! My friend Robby and I took a hangman game he was working on and turned it into something we could actually release on Steam. We learned a ton about Steam integration, especially dealing with Steamworks.NET and getting achievements working properly.',
+    longDescription: 'Robby was originally building this as a side project to learn, but we realized there might be potential to actually release something on Steam together. It was our second collaboration after GBJAM11, and this time we went all the way to a commercial release. The whole Steam integration process was way more complicated than I expected, especially dealing with cross-platform compatibility issues.',
     category: 'game',
-    tags: ['game-dev', 'pixel-art', 'unity', 'steam'],
+    tags: ['game-dev', 'steam', 'unity', 'team-project', 'commercial-release'],
     status: 'completed',
     featured: true,
-    technologies: ['Unity', 'C#', 'Steam SDK']
+    technologies: ['Unity', 'C#', 'Steamworks.NET', 'Steam SDK'],
+    startDate: new Date('2024-01-17'),
+    endDate: new Date('2024-06-05'),
+    liveUrl: 'https://store.steampowered.com/app/superhangman',
+    challenges: [
+      'Getting Steam integration working properly across different operating systems',
+      'Switching from Facepunch Steamworks to Steamworks.NET due to compatibility issues',
+      'Implementing achievements and leaderboards with the more verbose Steamworks.NET API',
+    ],
+    achievements: [
+      'Successfully released our first commercial game on Steam!',
+      'Figured out Steamworks integration despite the documentation challenges',
+      'Got achievements and leaderboards working properly',
+      'Learned a ton about the Steam publishing process'
+    ],
+    hasDetailedView: true,
+    detailedContent: {
+      overview: 'Super Hangman started as Robby\'s solo learning project but became our second collaboration and first commercial Steam release. We took the classic hangman concept and added Steam features like achievements, leaderboards, and stat tracking.',
+      problemStatement: 'Robby had a working hangman game but wanted to see if we could take it to the next level and actually release it commercially. We had to figure out Steam integration, which turned out to be way more complex than we initially thought.',
+      solution: 'We decided to integrate Steamworks to add achievements, leaderboards, and stat tracking. The game features AI-generated images after each guess, competitive scoring, and Steam integration for a modern take on the classic game.',
+      keyFeatures: [
+        'Classic hangman gameplay with modern polish',
+        'AI-generated images that appear after each guess',
+        'Steam achievements for reaching score milestones',
+        'Global leaderboards for competitive players',
+        'Stat tracking to create meaningful achievements',
+        'Cross-platform Steam integration'
+      ],
+      technicalDecisions: [
+        {
+          decision: 'Switched from Facepunch Steamworks to Steamworks.NET',
+          reasoning: 'We started with Facepunch because it was super easy to understand and get working quickly. But we ran into major issues when trying to run the game on non-Windows systems. Steamworks.NET is much more verbose but actually works everywhere.',
+          alternatives: ['Keep fighting with Facepunch', 'Abandon Steam integration', 'Use a different approach'],
+          impact: 'Took longer to implement but gave us reliable cross-platform Steam functionality. The API is much more verbose and feels like writing C++, but it works consistently.'
+        },
+        {
+          decision: 'Added AI-generated images to make the game more interesting',
+          reasoning: 'We wanted something to make the game feel fresh and modern. The AI-generated images that appear after each guess add a unique twist to the classic hangman format.',
+          alternatives: ['Use static images', 'No images at all', 'Hand-drawn art'],
+          impact: 'Made the game stand out from other hangman games and gave it a modern feel that people seemed to really enjoy.'
+        }
+      ],
+      lessonsLearned: [
+        'Steam integration is way more complex than it initially appears',
+        'Cross-platform compatibility issues can force you to completely rewrite integration code',
+        'Steamworks.NET documentation is basically the C++ docs - you have to read those',
+        'Achievements and leaderboards add a lot of replay value to simple games',
+        'Working with a friend on commercial projects is really rewarding'
+      ],
+      futureImprovements: [
+        'Maybe add more word categories or difficulty levels',
+        'Could implement multiplayer features',
+        'Might add more AI-generated content or customization options'
+      ]
+    },
   },
   ]);
 
