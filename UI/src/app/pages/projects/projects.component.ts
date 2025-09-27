@@ -42,7 +42,12 @@ export class ProjectsComponent implements OnInit {
   }
 
   getHeatmapColor(commitCount: number): string {
-    const maxCommits = Math.max(...this.portfolioService.commitData().map(r => r.commitCount));
+    const commitData = this.portfolioService.commitData();
+    if (commitData.length === 0) return '#374151'; // gray-700 (dark mode)
+    
+    const maxCommits = Math.max(...commitData.map(r => r.commitCount));
+    if (maxCommits === 0) return '#374151'; // gray-700 (dark mode)
+    
     const intensity = commitCount / maxCommits;
     
     if (intensity === 0) return '#374151'; // gray-700 (dark mode)

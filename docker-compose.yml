@@ -31,7 +31,7 @@ services:
     environment:
       - ConnectionStrings__Redis=redis:6379
       - Github__Token=${GITHUB_TOKEN}
-      - SignalR__HubUrl=http://localhost:30081/portfolioHub
+      - SignalR__HubUrl=http://localhost:30081/api/portfolioHub
     depends_on:
       - redis
     networks:
