@@ -64,46 +64,13 @@ app.MapPost("/api/notify/personal-summary-updated", async (string summary, IHubC
     return Results.Ok();
 });
 
-
-app.MapGet("/health/ollama", async (IHttpClientFactory httpClientFactory, IConfiguration config) => {
-    try {
-        string ollamaUrl = config["Ollama:BaseUrl"] ?? "http://127.0.0.1:11434";
-        HttpClient client = httpClientFactory.CreateClient();
-        client.Timeout = TimeSpan.FromSeconds(5);
-
-        HttpResponseMessage response = await client.GetAsync($"{ollamaUrl}/api/tags");
-        return Results.Ok(new {
-            status = response.IsSuccessStatusCode ? "healthy" : "unhealthy",
-            statusCode = response.StatusCode
-        });
-    }
-    catch (Exception ex) {
-        return Results.Ok(new {
-            status = "unhealthy",
-            error = ex.Message,
-            ollamaUrl = config["Ollama:BaseUrl"] ?? "http://127.0.0.1:11434"
-        });
-    }
-});
-
-
 app.MapPost("/regenerate-summary", async (CommitAnalysisService commitAnalysisService) => {
     try {
         await commitAnalysisService.InvalidateSummaryCacheAsync();
-        return Results.Ok(new { message = "Personal summary regenerated successfully" });
+        return Results.Ok(new { message = "Recent commits summary regenerated successfully" });
     }
     catch (Exception ex) {
         return Results.Problem($"Error regenerating summary: {ex.Message}");
-    }
-});
-
-app.MapPost("/api/notify/generate-summary", async (CommitAnalysisService commitAnalysisService) => {
-    try {
-        await commitAnalysisService.InvalidateSummaryCacheAsync();
-        return Results.Ok(new { message = "Personal summary generated and broadcasted successfully" });
-    }
-    catch (Exception ex) {
-        return Results.Problem($"Error generating summary: {ex.Message}");
     }
 });
 
