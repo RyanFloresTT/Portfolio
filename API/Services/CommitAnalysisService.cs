@@ -110,7 +110,7 @@ public class CommitAnalysisService(
         client.Timeout = TimeSpan.FromSeconds(120); // Increased timeout
 
         string context = string.Join(" | ", commitDetails);
-        string prompt = $"Based on my recent work: {context}. I've been working on";
+        string prompt = $"Write a brief first-person summary starting with 'I've been working on' based on this recent work: {context}. Keep it under 50 words and make it sound natural and personal.";
 
         var requestBody = new {
             model = model,
@@ -144,10 +144,11 @@ public class CommitAnalysisService(
                 summary = summary.Trim('"', '\'', '`').Trim();
                 logger.LogInformation("Ollama generated summary: {Summary}", summary);
 
-                if (summary.StartsWith("I've been working on", StringComparison.OrdinalIgnoreCase)) {
+                // Accept any reasonable summary, not just those starting with specific prefix
+                if (summary.Length > 10 && summary.Length < 200) {
                     return summary;
                 } else {
-                    logger.LogWarning("Summary doesn't start with expected prefix: {Summary}", summary);
+                    logger.LogWarning("Summary length invalid: {Length} characters", summary.Length);
                     return string.Empty;
                 }
             } else {
