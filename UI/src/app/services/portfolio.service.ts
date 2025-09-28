@@ -27,7 +27,17 @@ export class PortfolioService {
     this.initializeSignalR();
   }
 
+  ngOnDestroy() {
+    if (this.hubConnection) {
+      this.hubConnection.stop();
+    }
+  }
+
   private async initializeSignalR() {
+    if (this.hubConnection) {
+      await this.hubConnection.stop();
+    }
+
     this.hubConnection = new HubConnectionBuilder()
       .withUrl('https://api.ryanflores.dev/portfolioHub')
       .build();
