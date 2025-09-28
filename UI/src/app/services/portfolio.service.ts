@@ -29,7 +29,7 @@ export class PortfolioService {
 
   private async initializeSignalR() {
     this.hubConnection = new HubConnectionBuilder()
-      .withUrl('https://api.ryanflores.dev/portfolioHub')
+      .withUrl('/api/portfolioHub')
       .build();
 
     this.hubConnection.on('CommitDataUpdated', (data: CommitData[]) => {
@@ -63,7 +63,7 @@ export class PortfolioService {
 
   async loadCommitData() {
     try {
-      const data = await firstValueFrom(this.http.get<CommitData[]>('https://api.ryanflores.dev/'));
+      const data = await firstValueFrom(this.http.get<CommitData[]>('/api/'));
       if (data) {
         this.commitData.set(data);
       }
@@ -74,7 +74,7 @@ export class PortfolioService {
 
   async loadPersonalSummary() {
     try {
-      const response = await firstValueFrom(this.http.get<{summary: string}>('https://api.ryanflores.dev/personal-summary'));
+      const response = await firstValueFrom(this.http.get<{summary: string}>('/api/personal-summary'));
       if (response?.summary) {
         this.personalSummary.set(response.summary);
       }
