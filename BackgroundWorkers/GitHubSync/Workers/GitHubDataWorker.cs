@@ -20,7 +20,8 @@ public class GitHubDataWorker(
         var repositories = await response.Content.ReadFromJsonAsync<List<GitHubRepository>>();
         if (repositories == null) return;
 
-        DateTime periodStart = DateTime.UtcNow.AddDays(-90);
+        int daysBack = configuration.GetValue<int>("GitHubSync:DaysBack", 30);
+        DateTime periodStart = DateTime.UtcNow.AddDays(-daysBack);
         DateTime periodEnd = DateTime.UtcNow;
         List<RepoData> repoDataList = [];
 
