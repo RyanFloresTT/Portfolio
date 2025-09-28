@@ -29,7 +29,7 @@ export class PortfolioService {
 
   private async initializeSignalR() {
     this.hubConnection = new HubConnectionBuilder()
-      .withUrl('/api/portfolioHub')
+      .withUrl('https://api.ryanflores.dev/portfolioHub')
       .build();
 
     this.hubConnection.on('CommitDataUpdated', (data: CommitData[]) => {
