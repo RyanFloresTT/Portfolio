@@ -7,6 +7,11 @@ on:
     branches: [ main, dev ]
   workflow_dispatch:
 
+# Skip duplicate runs when PR is created from the same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test-solution-build:
     runs-on: ubuntu-latest
