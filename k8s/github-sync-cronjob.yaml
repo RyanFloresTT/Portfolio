@@ -4,7 +4,7 @@ metadata:
   name: github-sync
   namespace: portfolio
 spec:
-  schedule: "0 * * * *"  # Run every hour at minute 0
+  schedule: "*/15 * * * *"  # Run every 15 minutes
   concurrencyPolicy: Forbid  # Don't run if previous job is still running
   successfulJobsHistoryLimit: 1
   failedJobsHistoryLimit: 3

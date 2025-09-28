@@ -1,19 +1,17 @@
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 using Microsoft.Extensions.Logging;
 using Portfolio.Shared.Models;
 
-namespace Portfolio.Shared.Services;
+namespace Portfolio.Shared.HttpClients;
 
-public class GitHubCommitService(ILogger<GitHubCommitService> logger) {
-    /// <summary>
-    /// Fetches all commits for a repository using pagination
-    /// </summary>
-    /// <param name="client">HTTP client configured for GitHub API</param>
-    /// <param name="repositoryName">Name of the repository (e.g., "PortfolioMakeover")</param>
-    /// <param name="since">ISO date string for filtering commits since this date</param>
-    /// <returns>List of all commits within the time period, or null if none found</returns>
-    public async Task<List<GitHubCommit>?> FetchAllCommitsForRepositoryAsync(HttpClient client, string repositoryName,
-        string since) {
+public class GitHubHttpClient(HttpClient httpClient, ILogger<GitHubHttpClient> logger) {
+    public async Task<List<GitHubRepository>> GetRepositoriesAsync() {
+        HttpResponseMessage response = await httpClient.GetAsync("users/ryanflorestt/repos");
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<List<GitHubRepository>>() ?? [];
+    }
+
+    public async Task<List<GitHubCommit>?> GetCommitsAsync(string repositoryName, string since) {
         var allCommits = new List<GitHubCommit>();
         int page = 1;
         const int perPage = 100; // Maximum allowed by GitHub API
@@ -21,8 +19,8 @@ public class GitHubCommitService(ILogger<GitHubCommitService> logger) {
         while (true)
             try {
                 string commitsUrl =
-                    $"https://api.github.com/repos/ryanflorestt/{repositoryName}/commits?since={since}&per_page={perPage}&page={page}";
-                HttpResponseMessage response = await client.GetAsync(commitsUrl);
+                    $"repos/ryanflorestt/{repositoryName}/commits?since={since}&per_page={perPage}&page={page}";
+                HttpResponseMessage response = await httpClient.GetAsync(commitsUrl);
 
                 if (!response.IsSuccessStatusCode) {
                     if (page == 1)
@@ -34,12 +32,10 @@ public class GitHubCommitService(ILogger<GitHubCommitService> logger) {
                 var commits = await response.Content.ReadFromJsonAsync<List<GitHubCommit>>();
 
                 if (commits == null || commits.Count == 0)
-                    // No more commits on this page, we're done
                     break;
 
                 allCommits.AddRange(commits);
 
-                // If we got fewer commits than perPage, we've reached the end
                 if (commits.Count < perPage) break;
 
                 page++;

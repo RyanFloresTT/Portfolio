@@ -1,11 +1,8 @@
-using GitHubSync.Services;
-
 namespace GitHubSync.Workers;
 
 public class GitHubSyncWorker(
     ILogger<GitHubSyncWorker> logger,
-    GitHubDataWorker gitHubDataWorker,
-    NotifyApiService notifyApiService)
+    GitHubDataWorker gitHubDataWorker)
     : BackgroundService {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken) {
         try {
@@ -22,11 +19,5 @@ public class GitHubSyncWorker(
             logger.LogInformation("GitHub sync worker completed");
             Environment.Exit(0);
         }
-    }
-
-    public override async Task StopAsync(CancellationToken cancellationToken) {
-        logger.LogInformation("GitHub sync worker is stopping");
-        await notifyApiService.DisposeAsync();
-        await base.StopAsync(cancellationToken);
     }
 }

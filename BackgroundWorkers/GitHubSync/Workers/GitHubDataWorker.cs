@@ -1,47 +1,52 @@
-using GitHubSync.Services;
 using Portfolio.Shared.Models;
 using Portfolio.Shared.Services;
-using System.Net.Http.Json;
+using Portfolio.Shared.HttpClients;
 
 namespace GitHubSync.Workers;
 
 public class GitHubDataWorker(
-    IHttpClientFactory httpClientFactory,
+    GitHubHttpClient gitHubClient,
+    PortfolioHttpClient portfolioClient,
     ILogger<GitHubDataWorker> logger,
     RedisService redisService,
-    NotifyApiService notifyApiService,
-    GitHubCommitService gitHubCommitService,
     IConfiguration configuration) {
     public async Task FetchAndStoreGitHubData() {
-        HttpClient client = httpClientFactory.CreateClient("GitHub");
-        HttpResponseMessage response = await client.GetAsync("https://api.github.com/users/ryanflorestt/repos");
-        response.EnsureSuccessStatusCode();
-
-        var repositories = await response.Content.ReadFromJsonAsync<List<GitHubRepository>>();
-        if (repositories == null) return;
-
-        int daysBack = configuration.GetValue<int>("GitHubSync:DaysBack", 30);
+        int daysBack = configuration.GetValue("GitHubSync:DaysBack", 30);
         DateTime periodStart = DateTime.UtcNow.AddDays(-daysBack);
         DateTime periodEnd = DateTime.UtcNow;
+
+        var repositories = await gitHubClient.GetRepositoriesAsync();
+
         List<RepoData> repoDataList = [];
+        List<(string repoName, List<string> commitMessages)> topReposCommits = [];
 
         foreach (GitHubRepository repo in repositories)
             try {
                 string since = periodStart.ToString("o");
                 var allCommits =
-                    await gitHubCommitService.FetchAllCommitsForRepositoryAsync(client, repo.Name ?? string.Empty,
-                        since);
+                    await gitHubClient.GetCommitsAsync(repo.Name ?? string.Empty, since);
 
-                if (allCommits?.Count > 0)
-                    repoDataList.Add(new RepoData {
-                        Id = repo.Name?.GetHashCode() ?? 0,
-                        RepositoryName = repo.Name ?? string.Empty,
-                        RepositoryUrl = repo.HtmlUrl ?? string.Empty,
-                        CommitCount = allCommits.Count,
-                        LastUpdated = allCommits.Max(c => c.Commit?.Author?.Date ?? DateTime.MinValue),
-                        PeriodStart = periodStart,
-                        PeriodEnd = periodEnd
-                    });
+                if (!(allCommits?.Count > 0)) continue;
+
+                RepoData repoData = new() {
+                    Id = repo.Name?.GetHashCode() ?? 0,
+                    RepositoryName = repo.Name ?? string.Empty,
+                    RepositoryUrl = repo.HtmlUrl ?? string.Empty,
+                    CommitCount = allCommits.Count,
+                    LastUpdated = allCommits.Max(c => c.Commit?.Author?.Date ?? DateTime.MinValue),
+                    PeriodStart = periodStart,
+                    PeriodEnd = periodEnd
+                };
+
+                repoDataList.Add(repoData);
+
+                var commitMessages = allCommits
+                    .Where(c => !string.IsNullOrEmpty(c.Commit?.Message))
+                    .Select(c => c.Commit!.Message!.Trim())
+                    .Take(10)
+                    .ToList();
+
+                if (commitMessages.Count != 0) topReposCommits.Add((repo.Name ?? string.Empty, commitMessages));
             }
             catch (Exception ex) {
                 logger.LogWarning(ex, "Failed to fetch commits for repository {RepositoryName}", repo.Name);
@@ -52,54 +57,23 @@ public class GitHubDataWorker(
         if (repoDataList.Count != 0) {
             await redisService.SetAsync("github:repos", repoDataList, TimeSpan.FromHours(2));
 
-            foreach (RepoData? repo in repoDataList.Take(3))
-                try {
-                    string since = periodStart.ToString("o");
-                    var commits =
-                        await gitHubCommitService.FetchAllCommitsForRepositoryAsync(client, repo.RepositoryName, since);
+            var topRepos = repoDataList.Take(3).ToList();
+            foreach (RepoData repo in topRepos) {
+                var repoCommits = topReposCommits.FirstOrDefault(x => x.repoName == repo.RepositoryName);
 
-                    if (commits?.Count > 0) {
-                        var commitMessages = commits
-                            .Where(c => !string.IsNullOrEmpty(c.Commit?.Message))
-                            .Select(c => c.Commit!.Message!.Trim())
-                            .Take(10)
-                            .ToList();
+                if (repoCommits.commitMessages.Count == 0) continue;
 
-                        await redisService.SetAsync($"github:commits:{repo.RepositoryName}", commitMessages,
-                            TimeSpan.FromHours(2));
-                        logger.LogInformation("Stored {Count} commit messages for {RepoName}", commitMessages.Count,
-                            repo.RepositoryName);
-                    }
-                }
-                catch (Exception ex) {
-                    logger.LogWarning(ex, "Failed to store commit messages for {RepoName}", repo.RepositoryName);
-                }
+                await redisService.SetAsync($"github:commits:{repo.RepositoryName}", repoCommits.commitMessages,
+                    TimeSpan.FromHours(2));
+                logger.LogInformation("Stored {Count} commit messages for {RepoName}",
+                    repoCommits.commitMessages.Count, repo.RepositoryName);
+            }
 
             await redisService.DeleteAsync("recent-commits-summary");
 
-            await notifyApiService.NotifyCommitDataUpdated(repoDataList);
-
-            await TriggerSummaryGeneration();
+            await portfolioClient.NotifyCommitDataUpdated(repoDataList);
 
             logger.LogInformation("Updated commit data for {Count} repositories", repoDataList.Count);
-        }
-    }
-
-    async Task TriggerSummaryGeneration() {
-        try {
-            string apiBaseUrl = configuration["API:BaseUrl"] ?? "http://portfolio-api-service";
-            HttpClient client = httpClientFactory.CreateClient();
-
-            // Trigger the commit summary regeneration
-            HttpResponseMessage response = await client.PostAsync($"{apiBaseUrl}/regenerate-summary", null);
-
-            if (response.IsSuccessStatusCode)
-                logger.LogInformation("Successfully triggered recent commits summary generation");
-            else
-                logger.LogWarning("Failed to trigger summary generation: {StatusCode}", response.StatusCode);
-        }
-        catch (Exception ex) {
-            logger.LogError(ex, "Error triggering summary generation");
         }
     }
 }

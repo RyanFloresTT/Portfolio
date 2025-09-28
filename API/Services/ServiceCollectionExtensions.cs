@@ -33,7 +33,6 @@ public static class ServiceCollectionExtensions {
 
 
         services.AddSingleton<RedisService>();
-        services.AddSingleton<GitHubCommitService>();
         services.AddSingleton<CommitAnalysisService>();
     }
 }
