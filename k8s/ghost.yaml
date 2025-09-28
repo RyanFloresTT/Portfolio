@@ -24,11 +24,19 @@ spec:
         - name: database__connection__filename
           value: "/var/lib/ghost/content/data/ghost.db"
         - name: url
-          value: "http://ghost-service"
+          value: "https://blog.ryanflores.dev"
         - name: server__host
           value: "0.0.0.0"
         - name: server__port
           value: "2368"
+        - name: server__trustProxy
+          value: "true"
+        - name: url__protocol
+          value: "https"
+        - name: url__host
+          value: "blog.ryanflores.dev"
+        - name: members__api__url
+          value: "https://blog.ryanflores.dev"
         resources:  
           requests:
             memory: "256Mi"
