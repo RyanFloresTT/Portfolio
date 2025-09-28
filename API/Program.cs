@@ -23,8 +23,6 @@ if (app.Environment.IsDevelopment()) {
 else
     app.UseCors("prod-policy");
 
-app.UseHttpsRedirection();
-
 app.UseCors();
 
 app.MapEndpoints();
