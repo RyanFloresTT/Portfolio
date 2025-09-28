@@ -1,4 +1,5 @@
 using API.Services;
+using Microsoft.AspNetCore.SignalR;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -22,14 +23,17 @@ WebApplication app = builder.Build();
 
 if (app.Environment.IsDevelopment()) {
     app.MapOpenApi();
-    app.UseCors("dev-policy");
 }
-else
-    app.UseCors("prod-policy");
 
 app.UseHttpsRedirection();
 
-app.UseCors();
+if (app.Environment.IsDevelopment()) {
+    app.UseCors("dev-policy");
+} else {
+    app.UseCors("prod-policy");
+}
+
+app.UseRouting();
 
 app.MapEndpoints();
 

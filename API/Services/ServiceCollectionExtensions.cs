@@ -7,7 +7,7 @@ public static class ServiceCollectionExtensions {
     public static void AddCorsPolicies(this IServiceCollection services) {
         services.AddCors(options => {
             options.AddPolicy("dev-policy", policy =>
-                policy.WithOrigins("http://localhost:4200", "http://localhost:30082")
+                policy.WithOrigins("http://localhost:4200", "http://localhost:30082", "http://localhost:3000", "http://localhost:8080")
                     .AllowAnyMethod()
                     .AllowAnyHeader()
                     .AllowCredentials());
@@ -15,7 +15,7 @@ public static class ServiceCollectionExtensions {
 
         services.AddCors(options => {
             options.AddPolicy("prod-policy", policy =>
-                policy.WithOrigins("http://portfolio-frontend-service", "https://ryanflores.dev", "https://www.ryanflores.dev", "https://api.ryanflores.dev")
+                policy.WithOrigins("https://ryanflores.dev", "https://www.ryanflores.dev")
                     .AllowAnyMethod()
                     .AllowAnyHeader()
                     .AllowCredentials());
