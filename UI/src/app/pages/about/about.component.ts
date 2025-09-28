@@ -161,9 +161,9 @@ import { PortfolioService } from '../../services/portfolio.service';
           </div>
 
           <!-- Call to Action -->
-          <!-- <div class="mt-8 pt-6 border-t border-gray-200 text-center">
+          <div class="mt-8 pt-6 border-t border-gray-200 text-center">
             <p class="text-gray-600 dark:text-gray-400 mb-4">Want to learn more about the technical implementation?</p>
-            <a href="http://localhost:30080" target="_blank" rel="noopener noreferrer" 
+            <a href="https://blog.ryanflores.dev/building-a-real-time-portfolio/" rel="noopener noreferrer" 
                class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-green-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-green-700 hover:-translate-y-0.5 transition-all duration-200 shadow-md hover:shadow-lg">
               <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -174,7 +174,7 @@ import { PortfolioService } from '../../services/portfolio.service';
               </svg>
               Read the detailed technical blog post
             </a>
-          </div> -->
+          </div>
         </div>
       </div>
     </div>

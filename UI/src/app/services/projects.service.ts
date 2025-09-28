@@ -31,7 +31,7 @@ export class ProjectsService {
         'Implemented automated GitHub data synchronization!'
       ],
       hasDetailedView: true,
-      blogPostUrl: 'https://blog.example.com/portfolio-development-journey',
+      blogPostUrl: 'https://blog.ryanflores.dev/building-a-real-time-portfolio/',
       detailedContent: {
         overview: 'Built with Angular and .NET, this portfolio website features real-time data visualization, and a fully containerized deployment pipeline. The application serves as both a professional showcase and a demonstration of advanced technical capabilities.',
         problemStatement: 'While I have experience with .NET, I haven\'t had the chance to work with several modern tools I wanted to learn, specifically Kubernetes. I\'ve also been interested in Angular, SignalR, and Ghost CMS for blogging but hadn\'t had a chance to work with it. I wanted a project that would let me learn these technologies while building something cool. I also wanted to showcase my recent work in an engaging way by displaying recent commits from my repositories.',
