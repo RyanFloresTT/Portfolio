@@ -67,6 +67,7 @@ import { PortfolioService } from '../../services/portfolio.service';
                   <div class="flex items-center gap-2">
                     <div class="w-3 h-3 rounded-full" [class]="{
                       'bg-red-500': portfolioService.connectionStatus() === 'Disconnected',
+                      'bg-red-800': portfolioService.connectionStatus() === 'Error',
                       'bg-green-500': portfolioService.connectionStatus() === 'Connected',
                       'bg-yellow-500': portfolioService.connectionStatus() === 'Reconnecting'
                     }"></div>

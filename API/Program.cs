@@ -10,26 +10,19 @@ builder.Services.AddHttpClient();
 
 builder.Services.AddProjectDependencies(builder.Configuration);
 
-builder.Services.AddSignalR(options => {
-    options.EnableDetailedErrors = true;
-    options.KeepAliveInterval = TimeSpan.FromSeconds(15);
-    options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
-});
+builder.Services.AddSignalR().AddStackExchangeRedis(builder.Configuration["ConnectionStrings:Redis"] ?? string.Empty);
 
 builder.Services.AddCorsPolicies();
 
 WebApplication app = builder.Build();
 
-if (app.Environment.IsDevelopment()) {
-    app.MapOpenApi();
-    app.UseCors("dev-policy");
-}
-else
-    app.UseCors("prod-policy");
+if (app.Environment.IsDevelopment()) app.MapOpenApi();
 
 app.UseHttpsRedirection();
 
-app.UseCors();
+app.UseCors(app.Environment.IsDevelopment() ? "dev-policy" : "prod-policy");
+
+app.UseRouting();
 
 app.MapEndpoints();
 
