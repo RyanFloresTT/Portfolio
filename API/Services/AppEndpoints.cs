@@ -20,8 +20,12 @@ public static class AppEndpoints {
         });
 
         app.MapPost("/notify/commit-data-updated",
-            async (List<RepoData> commitData, IHubContext<PortfolioHub> hubContext) => {
+            async (List<RepoData> commitData, IHubContext<PortfolioHub> hubContext,
+                CommitAnalysisService commitAnalysisService) => {
                 await hubContext.Clients.All.SendAsync("CommitDataUpdated", commitData);
+
+                await commitAnalysisService.InvalidateSummaryCacheAsync();
+
                 return Results.Ok();
             });
 
@@ -30,15 +34,5 @@ public static class AppEndpoints {
                 await hubContext.Clients.All.SendAsync("PersonalSummaryUpdated", summary);
                 return Results.Ok();
             });
-
-        app.MapPost("/regenerate-summary", async (CommitAnalysisService commitAnalysisService) => {
-            try {
-                await commitAnalysisService.InvalidateSummaryCacheAsync();
-                return Results.Ok(new { message = "Recent commits summary regenerated successfully" });
-            }
-            catch (Exception ex) {
-                return Results.Problem($"Error regenerating summary: {ex.Message}");
-            }
-        });
     }
 }
