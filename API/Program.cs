@@ -10,7 +10,11 @@ builder.Services.AddHttpClient();
 
 builder.Services.AddProjectDependencies(builder.Configuration);
 
-builder.Services.AddSignalR();
+builder.Services.AddSignalR(options => {
+    options.EnableDetailedErrors = true;
+    options.KeepAliveInterval = TimeSpan.FromSeconds(15);
+    options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
+});
 
 builder.Services.AddCorsPolicies();
 
@@ -22,6 +26,8 @@ if (app.Environment.IsDevelopment()) {
 }
 else
     app.UseCors("prod-policy");
+
+app.UseHttpsRedirection();
 
 app.UseCors();
 
