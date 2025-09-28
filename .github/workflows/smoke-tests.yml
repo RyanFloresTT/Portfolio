@@ -62,21 +62,29 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Setup kubectl
+    - name: Set up kubectl
       uses: azure/setup-kubectl@v3
       with:
         version: 'latest'
 
+    - name: Install doctl
+      uses: digitalocean/action-doctl@v2
+      with:
+        token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+    - name: Save Digital Ocean kubeconfig
+      run: doctl kubernetes cluster kubeconfig save ${{ secrets.DIGITALOCEAN_CLUSTER_NAME }}
+
     - name: Validate K8s manifests
       run: |
-        echo "Validating Kubernetes manifests..."
+        echo "Validating Kubernetes manifests against cluster..."
         
-        # Validate each manifest syntax without requiring cluster connection
-        kubectl apply --dry-run=client --validate=false -f k8s/redis.yaml
-        kubectl apply --dry-run=client --validate=false -f k8s/api.yaml
-        kubectl apply --dry-run=client --validate=false -f k8s/frontend.yaml
-        kubectl apply --dry-run=client --validate=false -f k8s/ghost.yaml
-        kubectl apply --dry-run=client --validate=false -f k8s/portfolio-ingress.yaml
-        kubectl apply --dry-run=client --validate=false -f k8s/github-sync-cronjob.yaml
+        # Validate each manifest against the actual cluster
+        kubectl apply --dry-run=server -f k8s/redis.yaml
+        kubectl apply --dry-run=server -f k8s/api.yaml
+        kubectl apply --dry-run=server -f k8s/frontend.yaml
+        kubectl apply --dry-run=server -f k8s/ghost.yaml
+        kubectl apply --dry-run=server -f k8s/portfolio-ingress.yaml
+        kubectl apply --dry-run=server -f k8s/github-sync-cronjob.yaml
         
         echo "All K8s manifests are valid!"
