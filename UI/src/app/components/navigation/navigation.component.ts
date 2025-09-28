@@ -35,7 +35,7 @@ import { RouterModule } from '@angular/router';
                class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 text-sm font-medium transition-colors duration-200">
               About This Site
             </a>
-            <a href="/blog" target="_blank" rel="noopener noreferrer"
+            <a href="blog.ryanflores.dev" rel="noopener noreferrer"
                class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 text-sm font-medium transition-colors duration-200">
               Blog
             </a>
