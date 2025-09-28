@@ -8,17 +8,22 @@ spec:
   selector:
     matchLabels:
       app: ghost
+  strategy:
+    type: Recreate
   template:
     metadata:
       labels:
         app: ghost
     spec:
+      terminationGracePeriodSeconds: 30
       containers:
       - name: ghost
         image: ghost:alpine
         ports:
         - containerPort: 2368
         env:
+        - name: security__staffDeviceVerification
+          value: "false"
         - name: database__client
           value: "sqlite3"
         - name: database__connection__filename
@@ -37,6 +42,20 @@ spec:
           value: "blog.ryanflores.dev"
         - name: members__api__url
           value: "https://blog.ryanflores.dev"
+        - name: mail__transport
+          value: "Direct"
+        - name: mail__from
+          value: "noreply@blog.ryanflores.dev"
+        
+        # Disable all email-related features
+        - name: members__allowSelfSignup
+          value: "true"
+        - name: members__allowInviteOnly
+          value: "false"
+        - name: members__signupAccess
+          value: "all"
+        - name: members__inviteOnly
+          value: "false"
         resources:  
           requests:
             memory: "256Mi"
@@ -47,6 +66,10 @@ spec:
         volumeMounts:
         - name: ghost-data
           mountPath: /var/lib/ghost/content
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/bin/sh", "-c", "sleep 15"]
       volumes:
       - name: ghost-data
         persistentVolumeClaim:
