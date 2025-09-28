@@ -6,11 +6,6 @@ on:
     paths:
       - 'UI/**'
       - '.github/workflows/deploy-frontend.yml'
-  pull_request:
-    branches: [ main ]
-    paths:
-      - 'UI/**'
-      - '.github/workflows/deploy-frontend.yml'
   workflow_dispatch:
 
 env:
