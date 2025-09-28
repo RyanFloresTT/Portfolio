@@ -15,7 +15,7 @@ public static class ServiceCollectionExtensions {
 
         services.AddCors(options => {
             options.AddPolicy("prod-policy", policy =>
-                policy.WithOrigins("http://portfolio-frontend-service", "https://ryanflores.dev", "https://www.ryanflores.dev")
+                policy.WithOrigins("http://portfolio-frontend-service", "https://ryanflores.dev", "https://www.ryanflores.dev", "https://api.ryanflores.dev")
                     .AllowAnyMethod()
                     .AllowAnyHeader()
                     .AllowCredentials());
