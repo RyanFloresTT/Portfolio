@@ -8,13 +8,13 @@ public class NotifyApiService(
     IConfiguration configuration,
     ILogger<NotifyApiService> logger) {
     readonly HttpClient httpClient = httpClientFactory.CreateClient();
-    readonly string apiBaseUrl = configuration["API:BaseUrl"] ?? "https://api.trustytea.me";
+    readonly string apiBaseUrl = configuration["API:BaseUrl"] ?? "http://portfolio-api-service";
 
 
     public async Task NotifyCommitDataUpdated(List<RepoData> commitData) {
         try {
             HttpResponseMessage response =
-                await httpClient.PostAsJsonAsync($"{apiBaseUrl}/api/notify/commit-data-updated", commitData);
+                await httpClient.PostAsJsonAsync($"{apiBaseUrl}/notify/commit-data-updated", commitData);
             if (response.IsSuccessStatusCode)
                 logger.LogInformation("Notified API of commit data update");
             else

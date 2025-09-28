@@ -24,7 +24,7 @@ spec:
         - name: database__connection__filename
           value: "/var/lib/ghost/content/data/ghost.db"
         - name: url
-          value: "https://blog.ryanflores.dev"
+          value: "http://ghost-service"
         - name: server__host
           value: "0.0.0.0"
         - name: server__port
