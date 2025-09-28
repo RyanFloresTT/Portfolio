@@ -7,12 +7,6 @@ on:
       - 'BackgroundWorkers/**'
       - 'API/**'
       - '.github/workflows/deploy-github-sync.yml'
-  pull_request:
-    branches: [ main ]
-    paths:
-      - 'BackgroundWorkers/**'
-      - 'API/**'
-      - '.github/workflows/deploy-github-sync.yml'
   workflow_dispatch:
 
 env:
