@@ -22,12 +22,12 @@ public static class AppEndpoints {
         app.MapPost("/notify/commit-data-updated",
             async (List<RepoData> commitData, IHubContext<PortfolioHub> hubContext,
                 CommitAnalysisService commitAnalysisService) => {
-                await hubContext.Clients.All.SendAsync("CommitDataUpdated", commitData);
+                    await hubContext.Clients.All.SendAsync("CommitDataUpdated", commitData);
 
-                await commitAnalysisService.InvalidateSummaryCacheAsync();
+                    await commitAnalysisService.InvalidateSummaryCacheAsync();
 
-                return Results.Ok();
-            });
+                    return Results.Ok();
+                });
 
         app.MapPost("/notify/personal-summary-updated",
             async (string summary, IHubContext<PortfolioHub> hubContext) => {
