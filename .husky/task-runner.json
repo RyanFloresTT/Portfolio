@@ -2,15 +2,11 @@
   "$schema": "https://alirezanet.github.io/Husky.Net/schema.json",
   "tasks": [
     {
-      "name": "format", 
-      "command": "dotnet format"
-    },
-    {
-      "name": "restage",
-      "command": "git add ."
+      "name": "verify-format",
+      "command": "dotnet format --verify-no-changes"
     }
-  ], 
+  ],
   "hooks": {
-    "pre-commit": ["format", "restage"]
+    "pre-commit": ["verify-format"]
   }
 }
