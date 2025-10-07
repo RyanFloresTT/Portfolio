@@ -3,10 +3,14 @@
   "tasks": [
     {
       "name": "format", 
-      "command": "dotnet format --verify-no-changes"
+      "command": "dotnet format"
+    },
+    {
+      "name": "restage",
+      "command": "git add ."
     }
   ], 
   "hooks": {
-    "pre-commit": ["format"]
+    "pre-commit": ["format", "restage"]
   }
 }
