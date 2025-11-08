@@ -42,6 +42,8 @@ public class GitHubDataWorker(
 
                 var commitMessages = allCommits
                     .Where(c => !string.IsNullOrEmpty(c.Commit?.Message))
+                    .Where(c => c.Commit is { Message: not null } &&
+                                !c.Commit.Message.Contains("closes #")) // remove PR commits
                     .Select(c => c.Commit!.Message!.Trim())
                     .Take(10)
                     .ToList();
