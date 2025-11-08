@@ -310,6 +310,7 @@ export class ProjectsService {
       featured: true,
       technologies: ['Go', 'Docker', 'BubbleTea'],
       startDate: new Date('2025-11-3'),
+      githubUrl: 'https://github.com/RyanFloresTT/Dockerview',
       challenges: [
         'Relearning Go syntax after some time away',
         'Mastering BubbleTea to build a responsive and intuitive TUI'
