@@ -11,7 +11,7 @@
           Full-Stack Developer & Tech Enthusiast
         </p>
       </div>
-      
+
       <!-- Intro Section -->
       <div class="space-y-6">
         <!-- Personal Summary -->
@@ -21,10 +21,10 @@
             {{ displaySummary() }}<span class="animate-pulse text-blue-600 font-bold">|</span>
           </p>
         </div>
-        
+
         <!-- Action Bar -->
         <div class="flex justify-between items-center flex-wrap gap-4">
-          <a href="/blog" target="_blank" rel="noopener noreferrer" 
+          <a href="/blog" target="_blank" rel="noopener noreferrer"
              class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 hover:-translate-y-0.5 transition-all duration-200 shadow-md hover:shadow-lg">
             <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -55,7 +55,7 @@
           <p class="text-4xl font-bold text-blue-600">{{ portfolioService.commitData().length }}</p>
         </div>
         <div class="bg-gradient-to-r from-green-50 to-green-100 p-6 rounded-xl border-l-4 border-green-600">
-          <h3 class="text-gray-700 font-medium mb-2">Total Commits (30 days)</h3>
+          <h3 class="text-gray-700 font-medium mb-2">Total Commits (90 days)</h3>
           <p class="text-4xl font-bold text-green-600">{{ getTotalCommits() }}</p>
         </div>
       </div>
@@ -101,7 +101,7 @@
       <!-- About This Site Section -->
       <div class="mb-10">
         <h2 class="text-3xl font-bold text-gray-800 mb-6">About This Site</h2>
-        
+
         <div class="bg-white rounded-xl border border-gray-200 p-8 shadow-sm">
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <!-- Architecture Overview -->
@@ -114,7 +114,7 @@
               </h3>
               <div class="space-y-4 text-gray-700">
                 <p>This portfolio is built with a modern, real-time architecture that showcases both my development skills and the technologies I work with.</p>
-                
+
                 <div class="grid grid-cols-2 gap-4">
                   <div class="bg-blue-50 p-3 rounded-lg">
                     <h4 class="font-semibold text-blue-800 mb-1">Frontend</h4>
@@ -156,12 +156,12 @@
                     <span class="text-sm font-medium">{{ portfolioService.connectionStatus() }}</span>
                   </div>
                 </div>
-                
+
                 <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <span class="text-gray-700">Data Sources</span>
                   <span class="text-sm font-medium text-green-600">GitHub API</span>
                 </div>
-                
+
                 <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <span class="text-gray-700">Real-time Updates</span>
                   <span class="text-sm font-medium text-green-600">SignalR Active</span>
@@ -188,7 +188,7 @@
                 <h4 class="font-semibold text-gray-800 mb-2">Real-time Data</h4>
                 <p class="text-sm text-gray-600">GitHub commits sync automatically every hour, with live updates via SignalR</p>
               </div>
-              
+
               <div class="text-center">
                 <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
                   <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -198,7 +198,7 @@
                 <h4 class="font-semibold text-gray-800 mb-2">Recent Activity</h4>
                 <p class="text-sm text-gray-600">Live updates showing recent commits from top repositories with intelligent filtering</p>
               </div>
-              
+
               <div class="text-center">
                 <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
                   <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -214,7 +214,7 @@
           <!-- Call to Action -->
           <div class="mt-8 pt-6 border-t border-gray-200 text-center">
             <p class="text-gray-600 mb-4">Want to learn more about the technical implementation?</p>
-            <a href="/blog" target="_blank" rel="noopener noreferrer" 
+            <a href="/blog" target="_blank" rel="noopener noreferrer"
                class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-green-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-green-700 hover:-translate-y-0.5 transition-all duration-200 shadow-md hover:shadow-lg">
               <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
