@@ -242,7 +242,7 @@ export class ProjectsService {
     category: 'game',
     tags: ['game-dev', 'steam', 'unity', 'team-project', 'commercial-release'],
     status: 'completed',
-    featured: true,
+    featured: false,
     technologies: ['Unity', 'C#', 'Steamworks.NET', 'Steam SDK'],
     startDate: new Date('2024-01-17'),
     endDate: new Date('2024-06-05'),
@@ -299,6 +299,62 @@ export class ProjectsService {
       ]
     },
   },
+    {
+      id: 'Docker TUI',
+      name: 'Docker TUI',
+      description: 'A terminal UI to manage Docker containers and images, automating repetitive workflows.',
+      longDescription: 'At work, I manage 20+ Docker containers, each with unique environment variables, often running multiple replicas. Docker Compose didn’t fit our workflow, and every new image push required a repetitive cycle: stop, remove, pull, and restart. I built this TUI to automate that process, saving time and reducing errors.',
+      category: 'cli',
+      tags: ['cli', 'docker', 'go', 'tui', 'automation'],
+      status: 'in-progress',
+      featured: true,
+      technologies: ['Go', 'Docker', 'BubbleTea'],
+      startDate: new Date('2025-11-3'),
+      challenges: [
+        'Relearning Go syntax after some time away',
+        'Mastering BubbleTea to build a responsive and intuitive TUI'
+      ],
+      achievements: [
+        'Automated a manual, repetitive process, reducing restart time from 30s to 10s per container',
+        'Introduced the tool to the team, who adopted it successfully'
+      ],
+      hasDetailedView: true,
+      detailedContent: {
+        overview: 'A Go-based TUI to simplify Docker container management, improving efficiency and reducing repetitive manual work.',
+        problemStatement: 'Manually stopping, removing, pulling, and restarting containers for each image update was time-consuming and error-prone.',
+        solution: 'Built a lightweight terminal UI that allows users to perform all container management tasks with keybinds, reducing time and complexity.',
+        keyFeatures: [
+          'Keybinds for common Docker operations (stop, remove, pull, restart)',
+          'Displays container and image status in real-time',
+          'Supports managing multiple containers with minimal commands'
+        ],
+        technicalDecisions: [
+          {
+            decision: 'Used Go for the CLI',
+            reasoning: 'Go is performant, strongly typed, and has a great ecosystem for building CLI and TUI tools.',
+            alternatives: ['Python', 'Rust', 'JavaScript'],
+            impact: 'Ensures fast execution, minimal dependencies, and maintainable code for CLI automation.'
+          }
+        ],
+        lessonsLearned: [
+          'TUI development requires thinking about UX differently than web or GUI apps; keybinds and feedback loops are critical.',
+          'Go’s concurrency model made handling multiple container operations straightforward.'
+        ],
+        metrics: [
+          {
+            name: 'Container Restart Time',
+            value: '10s',
+            description: 'Time taken to stop, remove, pull, and restart a Docker container',
+            improvement: 'Reduced from 30s to 10s per container after using the TUI'
+          }
+        ],
+        futureImprovements: [
+          'Add additional keybinds for actions like starting containers from images',
+          'Enhance UI aesthetics and usability',
+          'Add better logging and status history for easier troubleshooting'
+        ]
+      }
+    }
   ]);
 
   constructor() {}
@@ -337,15 +393,15 @@ export class ProjectsService {
   }
 
   updateProject(id: string, updates: Partial<Project>): void {
-    this.projects.update(projects => 
-      projects.map(project => 
+    this.projects.update(projects =>
+      projects.map(project =>
         project.id === id ? { ...project, ...updates } : project
       )
     );
   }
 
   deleteProject(id: string): void {
-    this.projects.update(projects => 
+    this.projects.update(projects =>
       projects.filter(project => project.id !== id)
     );
   }

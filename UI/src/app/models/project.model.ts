@@ -11,7 +11,7 @@ export interface Project {
   featured: boolean;
   startDate?: Date;
   endDate?: Date;
-  category: 'web' | 'mobile' | 'desktop' | 'api' | 'devops' | 'ai' | 'game' | 'other';
+  category: 'web' | 'mobile' | 'desktop' | 'api' | 'devops' | 'ai' | 'game' | 'other' | 'cli';
   tags: string[];
   screenshots?: string[];
   challenges?: string[];
