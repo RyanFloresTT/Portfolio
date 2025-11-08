@@ -1,7 +1,6 @@
 namespace Portfolio.Shared.Models;
 
-public class CommitData
-{
+public class CommitData {
     public int Id { get; set; }
     public string RepositoryName { get; set; } = string.Empty;
     public string RepositoryUrl { get; set; } = string.Empty;
