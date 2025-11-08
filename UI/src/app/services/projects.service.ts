@@ -354,8 +354,96 @@ export class ProjectsService {
           'Add better logging and status history for easier troubleshooting'
         ]
       }
+    },
+    {
+      id: 'Book Collection SaaS',
+      name: 'Book Collection SaaS',
+      description: 'A full-stack SaaS app for managing personal book collections with analytics, payments, and secure user accounts.',
+      longDescription: 'A real-world SaaS application that lets users manage their book collections, track stats, and upgrade to premium features. Built with a Go backend, React TypeScript frontend, Auth0 authentication, Stripe subscriptions, and PostgreSQL for persistent data storage. Fully containerized with Docker and deployed through CI/CD.',
+      category: 'web',
+      tags: ['web', 'docker', 'go', 'api', 'react', 'typescript', 'saas'],
+      status: 'completed',
+      featured: true,
+      technologies: ['Go', 'Docker', 'Auth0', 'React', 'TypeScript', 'Stripe', 'PostgreSQL'],
+      startDate: new Date('2024-12-23'),
+      challenges: [
+        'Integrating Stripe subscription handling, webhooks, and premium feature gating',
+        'Designing secure auth and user isolation using Auth0 and JWT',
+        'Evaluating external book APIs and deciding whether to integrate OpenLibrary or Google Books'
+      ],
+      achievements: [
+        'Implemented Free & Premium tiers with Stripe payments and feature gating',
+        'Built a secure authentication layer with Auth0 and JWT, ensuring full user data isolation',
+        'Added a PostgreSQL database for persistent user and book data with clean relational modeling',
+        'Automated CI/CD with testing, type-checking, and coverage reporting using GitHub Actions and Codecov'
+      ],
+      hasDetailedView: true,
+      detailedContent: {
+        overview: 'Users can add, edit, and track books, view collection stats, and unlock premium analytics via Stripe subscription.',
+        problemStatement: 'Most personal book apps don’t offer detailed analytics or premium SaaS structure. I wanted to build a real-world subscription product with auth, payments, dashboards, and cloud deployment.',
+        solution: 'Designed a full-stack SaaS system with a Go API, PostgreSQL database, React UI, Auth0 identity, Stripe subscriptions, premium feature gating, dashboards, and Docker-based deployment.',
+        keyFeatures: [
+          'Book management (add/edit/delete) stored in PostgreSQL and scoped per authenticated user',
+          'Reading stats and collection analytics',
+          'Stripe subscription with Free & Premium tier gating',
+          'Auth0 authentication, user profiles, and secure data separation',
+          'Responsive Material UI frontend with interactive dashboards'
+        ],
+        technicalDecisions: [
+          {
+            decision: 'Use Go + PostgreSQL for backend API and data',
+            reasoning: 'Go’s performance and type safety pairs well with PostgreSQL for relational user/book data and complex queries',
+            alternatives: ['Node.js + PostgreSQL', 'Firebase'],
+            impact: 'Fast backend performance, schema integrity, strong typing, and maintainable data operations'
+          },
+          {
+            decision: 'Used manual book entry instead of OpenLibrary or Google Books API (for now)',
+            reasoning: 'I created an interface in Go that allowed me to swap between OpenLibrary and Google Books—OpenLibrary had better catalog depth and metadata, while GoogleBooks offered Google account integration. Neither fully matched what I wanted at this stage, so I temporarily chose manual entry for reliability and full data control.',
+            alternatives: ['OpenLibrary API', 'Google Books API'],
+            impact: 'Clean, maintainable code with the ability to plug in ISBN scanning or API-based importing in the future without rewriting business logic'
+          },
+          {
+            decision: 'Use Auth0 for authentication',
+            reasoning: 'Reliable, secure managed auth with minimal maintenance and great developer SDK support',
+            alternatives: ['Custom JWT system', 'Firebase Auth'],
+            impact: 'Secure user isolation and rapid implementation of OAuth and JWT flows'
+          }
+        ],
+        lessonsLearned: [
+          'External book APIs are inconsistent: OpenLibrary offers richer metadata but weaker auth; GoogleBooks has clean OAuth options but less complete data. Abstraction behind a Go interface made it easy to explore both.',
+          'Running multiple containers (frontend, backend, DB, proxy) is easiest when everything is Dockerized from day one',
+          'PostgreSQL + Go’s database ecosystem makes relational modeling straightforward and maintainable',
+        ],
+        metrics: [
+          {
+            name: 'Automated Deployments',
+            value: 'Docker Compose + CI/CD',
+            description: 'The entire stack can be deployed or brought up locally with a single command',
+            improvement: 'Removed manual multi-step setup'
+          },
+          {
+            name: 'Premium Subscription Automation',
+            value: 'Webhook-driven',
+            description: 'Stripe webhooks manage subscription status and premium feature access automatically',
+            improvement: 'No manual DB updates or admin involvement required'
+          },
+          {
+            name: 'User Data Isolation',
+            value: 'Strict JWT + DB scoping',
+            description: 'Each user only sees their own books and stats',
+            improvement: 'Migrated from local un-authenticated storage'
+          }
+        ],
+        futureImprovements: [
+          'Add ISBN scanning and automated importing using OpenLibrary or Google Books API',
+          'Add the planned "Spotify Wrapped" style annual reading insights',
+          'Launch behind a custom domain and actively market it',
+          'Create a mobile app for iOS/Android users',
+          'Add improved book importing via ISBN or Google Books API'
+        ]
+      }
     }
-  ]);
+]);
 
   constructor() {}
 
