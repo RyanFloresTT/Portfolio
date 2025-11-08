@@ -366,6 +366,9 @@ export class ProjectsService {
       featured: true,
       technologies: ['Go', 'Docker', 'Auth0', 'React', 'TypeScript', 'Stripe', 'PostgreSQL'],
       startDate: new Date('2024-12-23'),
+      endDate: new Date('2025-01-23'),
+      liveUrl: 'https://frontend-production-02b1.up.railway.app',
+      githubUrl: 'https://github.com/RyanFloresTT/BookCollectionApp',
       challenges: [
         'Integrating Stripe subscription handling, webhooks, and premium feature gating',
         'Designing secure auth and user isolation using Auth0 and JWT',
