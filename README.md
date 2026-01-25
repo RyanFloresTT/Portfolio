@@ -1,5 +1,7 @@
 # Portfolio Makeover
 
+***This project is no longer live, mostly because it was $50/mo to host the K8s cluster and Load Balancer :)***
+
 Portfolio Makeover is a full-stack project that pulls my GitHub activity and stores it in Redis, ready for the API to alert the UI about it via SignalR for real time updates.
 
 ## Features
